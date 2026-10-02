@@ -7,7 +7,7 @@
 
 ```text
 AGENTS.md가 가리키는 파일을 모두 읽고, MASTER_PROMPT.md의 규칙에 따라 작업하라.
-현재 Gate를 먼저 보고하라 (기록 위치: docs/traceability-convention.md §5, 기록이 없으면 UNKNOWN).
+현재 Gate를 먼저 보고하라 (프로젝트 단위: docs/gates.md, 변경 단위: specs/<change-id>/gates.md, 규칙: docs/traceability-convention.md §5, 기록이 없거나 무효이면 UNKNOWN).
 통과하지 않은 Gate의 다음 단계로 진행하지 마라.
 ```
 

@@ -10,4 +10,4 @@
 | 산출물 | `docs/03~08` 또는 `specs/<change-id>/design.md`, 초기 `traceability.md` |
 | Gate | `DESIGN_READY = true` |
 
-ID 규칙은 `docs/traceability-convention.md`. 핵심 기술 스택 변경은 사용자 승인 필요.
+ID 규칙은 `docs/traceability-convention.md`. 핵심 기술 스택 변경은 사용자 승인 필요. 진입 조건: 사용자 승인 기록 `APPROVAL_SPEC` (`workflows/README.md`).

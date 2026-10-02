@@ -10,4 +10,4 @@
 | 산출물 | 최종 `traceability.md`, 불일치 분류 목록 |
 | Gate | `TRACEABILITY_COMPLETE = true, NO_CRITICAL_OPEN_ISSUES = true` |
 
-의도가 불명확한 항목은 조용히 고치지 않고 `INTENT_UNKNOWN`으로 남긴다.
+의도가 불명확한 항목은 조용히 고치지 않고 `INTENT_UNKNOWN`으로 남긴다. converge 이후 기능을 `DONE`으로 보고하려면 사용자의 `ACCEPTANCE` 기록이 필요하다 (`workflows/README.md` 사용자 승인 기록).

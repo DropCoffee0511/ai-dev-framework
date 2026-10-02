@@ -17,7 +17,7 @@
 | DB migration / schema | 없음 |
 | 테스트 | 없음 |
 | 실행 가능한 기능 | 없음 |
-| 조사 시작 시점 git 저장소 여부 | 아님 (`fatal: not a git repository`) → 사용자 승인 후 `git init -b main` 실행, 커밋 없음 |
+| 조사 시작 시점 git 저장소 여부 | 아님 (`fatal: not a git repository`) → 사용자 승인 후 `git init -b main` 실행 (조사 시점에는 커밋 없음. 이후 커밋과 GitHub 원격 저장소가 생김 — `git log` 참조) |
 | 사용자의 명시 | "v0.1 구축 시작" — 새 프로젝트 |
 
 ## 2. 조사 시작 시점의 파일 (보존 대상)
@@ -38,7 +38,7 @@
 | # | 기존 `CLAUDE.md`의 내용 | MASTER_PROMPT | 해결 |
 |---|---|---|---|
 | C1 | "파일은 대화록 하나뿐" | 이제 `BOOTSTRAP.md`, `MASTER_PROMPT.md`도 존재 | `CLAUDE.md` 재작성 시 제거 |
-| C2 | Spec Kit Extension/Preset을 **"확정"** 결정으로 서술 | §15.2: "가능하면 extension/preset/workflow 방식 **우선**" (선호이지 확정 아님) | 확정 표현 폐기. `docs/01_product.md`에 "선호, 미확정"으로 기록 |
+| C2 | Spec Kit Extension/Preset을 **"확정"** 결정으로 서술 | §15.2: "가능하면 extension/preset/workflow 방식 **우선**" (선호이지 확정 아님) | 확정 표현 폐기. "선호, 미확정"으로 §5의 A6와 `NEXT.md`의 사용자 결정 항목에 기록 (`docs/01_product.md`는 대상 프로젝트용 템플릿이라 여기에 쓰지 않는다) |
 | C3 | 미결 8개 항목을 "사용자 확인 없이 결정하지 말 것"으로 일괄 금지 | §22: 사소한 선택은 `ASSUMPTION / IMPACT / REVERSIBLE`로 기록하고 진행. 핵심 업무 정책·돈 계산·인증/권한·개인정보·파괴적 migration·라이선스 불명 코드만 임의 확정 금지 | `CLAUDE.md`의 일괄 금지 문구 폐기. 아래 §5에서 항목별로 분류 |
 | C4 | 계획 구조에 `agents/`, `standards/`, `src/` 등 전체 나열 | §12: "빈 디렉터리를 무의미하게 모두 만들 필요 없다" | 필요한 최소 구조부터 생성 |
 | C5 | 라이선스 표에 대화록의 Spec Kit/OpenSpec 등 저작권 표기 예시를 그대로 옮김 | §16: `THIRD_PARTY_NOTICES.md`에는 **실제로 코드를 가져온 항목만** | 현재 가져온 코드 없음 → "없음"으로 기록 |
@@ -68,9 +68,9 @@
 |---|---|---|---|
 | 1 | 프로젝트 이름 | 사용자 결정 (법적·브랜드) | 작업명 A1로 진행, **미결** |
 | 2 | Spec Kit과의 관계 | 아키텍처 | A6, **미결** (선호: extension/preset) |
-| 3 | CLI 명령어 체계 | 사용자 UX | v0.1은 `/init`, `/project-discover`, `/feature`를 **이름만 예약**(대화록 §9). 동작 정의는 `NEXT.md` |
+| 3 | CLI 명령어 체계 | 사용자 UX | v0.1은 `/project-discover`, `/feature`를 **이름만 예약**(대화록 §9). `/init`은 Claude Code 내장 명령과 충돌하므로 예약하지 않고 확정을 보류한다 (R4). 동작 정의는 `NEXT.md` |
 | 4 | Claude/Codex/Gemini 공통 규격 | 아키텍처 | 공통 규칙은 파일(`MASTER_PROMPT.md`, `constitution/`, `docs/`, `specs/`), 에이전트별 파일은 adapter (§14) |
-| 5 | 문서 포맷 | 아키텍처 | Markdown + 최소 YAML front matter (`docs/traceability-convention.md`) |
+| 5 | 문서 포맷 | 아키텍처 | Markdown + YAML 블록 (front matter는 정의하지 않음. `docs/traceability-convention.md`) |
 | 6 | Traceability 저장 방식 | 아키텍처 | Markdown/YAML (A4) |
 | 7 | Gate 시스템 구현 방식 | 아키텍처 | v0.1은 문서화된 Gate 이름과 판정 규칙까지. 자동 강제는 `NEXT.md` |
 | 8 | Brownfield 분석 방식 | 아키텍처 | `workflows/discover/`에 절차 정의. 자동화는 `NEXT.md` |
@@ -92,4 +92,4 @@ DISCOVERY_COMPLETE = true
 
 조건 충족 근거: GREENFIELD 판정 및 근거(§1), 보존 목록(§2), 충돌 목록과 해결(§3), 라이선스 처리(§4), 가정(§5), 위험(§6) 기록.
 
-이 Gate 판정은 자기 판정이다. 전체 부트스트랩 종료 시 독립 reviewer의 검토를 받는다.
+이 Gate 판정은 자기 판정이다. 전체 부트스트랩 종료 시 독립 reviewer의 검토를 받는다. **현재 Gate 값과 독립 검토 결과(`B_FINAL = FAIL`)는 `docs/gates.md`와 `docs/audits/audit-001.md`에 있다.**
