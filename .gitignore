@@ -1,1 +1,39 @@
+# AI tool local state
 .omc/
+.claude/settings.local.json
+
+# Secrets and credentials (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+*.secret
+secrets/
+credentials*.json
+service-account*.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Dependencies and build output (for future code)
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+coverage/
+
+# Logs and temp
+*.log
+*.tmp
+*.bak
