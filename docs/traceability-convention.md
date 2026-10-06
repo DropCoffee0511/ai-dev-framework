@@ -86,55 +86,50 @@ else                                → NOT READY   (방어용: 위 표로 계�
 - 리뷰 기록이 아직 없는 REQ는 `IN PROGRESS`이다 (`NOT READY`가 아니다). 유효한 `IMPLEMENTATION_REVIEW_PASS = false`가 있으면 `NOT READY`이다.
 - 계산된 `DONE`은 **구현·추적 상태**일 뿐이다. 기능을 완료로 **보고**하려면 사용자 승인 기록 `ACCEPTANCE`가 추가로 필요하다 (`workflows/README.md` 사용자 승인 기록).
 
-## 5. Gate와의 관계
+## 5. Gate 기록 규칙 (이 규약의 단일 출처)
+
+다른 문서(`workflows/README.md`, 어댑터 등)는 이 절을 복제하지 않고 가리킨다.
 
 - `TRACEABILITY_COMPLETE`(`workflows/converge`)는 **범위 안의 모든 REQ가 `DONE`으로 계산되고 `INTENT_UNKNOWN`이 사용자에게 인지되어 있을 때** 참이다. (`MASTER_PROMPT.md` §5.11의 Gate에 대한 이 규약의 해석이다.)
 
-### 5.1 Gate 기록 위치와 형식
+### 5.1 기록 위치와 형식
 
-- Gate 값은 **`traceability.md`가 아니라 별도 파일**에 기록한다. 구현자가 수정하는 파일에 Gate를 두면 구현자가 리뷰 Gate를 고칠 수 있기 때문이다.
-  - 변경 단위: `specs/<change-id>/gates.md`
-  - 프로젝트 단위(변경 단위가 없는 Gate, 부트스트랩 등): `docs/gates.md`
-- 형식은 `docs/gates.md`의 표와 같다: `일시 | Gate | 값 | 판정자 유형 | 판정자 | 판정 기준 | 근거 | 비고`.
+- Gate 값은 `traceability.md`가 아니라 **별도 파일**에 기록한다. 구현자가 수정하는 파일에 두면 구현자가 리뷰 Gate를 고칠 수 있기 때문이다.
+  - 변경 단위: `specs/<change-id>/gates.md` (그 REQ의 `traceability.md`와 같은 폴더의 것만 읽는다. 한 폴더에 REQ가 둘 이상이면 모든 Gate 줄의 근거 칸에 적용 REQ 목록을 적는다. 목록이 없는 줄은 어느 REQ에도 적용되지 않는다(`UNKNOWN`). REQ가 하나뿐이면 생략할 수 있다). 규칙 단순화 이전 이력 구역의 구 형식 줄은 기록된 값 그대로 인정한다(`docs/gates.md`)
+  - 프로젝트 단위(부트스트랩 등): `docs/gates.md`
+- 표의 칸: `일시 | Gate | 값 | 판정자 | 근거`
+  - 값: `true | false | STALE` (숫자 Gate `SPEC_AMBIGUITY_BLOCKERS = 0`은 blocker가 0이면 `true`)
+  - 근거: 판정 시점의 **git 커밋 해시**(커밋 전이면 "커밋 전")와 증거(파일 경로 또는 사용자 메시지 인용)
 - **append-only**: 기존 줄을 수정·삭제하지 않는다. 값을 바꾸려면 새 줄을 추가하고, 같은 Gate의 **가장 아래 줄**이 현재 값이다.
-- "판정 기준"은 판정한 시점의 **git 커밋 해시**(커밋 전이면 그렇게 적는다). "근거"는 판정의 증거가 되는 파일 경로다.
-- 기록이 없거나 아래 판정자 규칙을 어긴 줄만 있으면 그 Gate는 `UNKNOWN`이며, 에이전트는 진행하지 않고 그렇게 보고한다. 에이전트가 "현재 Gate"를 보고할 때는 이 기록을 읽는다.
-- implement 단계의 developer는 `gates.md`를 수정하지 않는다 (`workflows/README.md` 쓰기 허용 범위).
-- **범위**: REQ의 Gate는 그 REQ의 `traceability.md`와 **같은 폴더의 `gates.md`**에서 읽는다. Gate 줄의 비고에 적용 범위(REQ 목록)를 적고, 범위에 없는 REQ에는 그 줄이 적용되지 않는다(해당 Gate는 `UNKNOWN`).
-- **기록 주체**: 줄은 그 Gate를 판정한 컨텍스트가 추가한다. 오케스트레이터의 대리 기록 규칙은 `workflows/README.md`의 쓰기 허용 범위 아래에 있다. 대리 기록은 비고에 `대리 기록`이라고 적는다.
+- 기록이 없거나 아래 판정자 규칙을 어긴 줄만 있으면 그 Gate는 `UNKNOWN`이다. 에이전트는 진행하지 않고 그렇게 보고한다.
+- implement 단계의 developer는 `gates.md`를 수정하지 않는다. 위반은 `git log`/`git diff`로 사후 탐지한다.
 
 ### 5.2 판정자 규칙
 
-| 판정자 유형 | 의미 |
+판정자 유형은 두 가지다.
+
+| 유형 | 의미 |
 |---|---|
-| `USER` | 사람인 사용자의 승인·확인·판정. AI가 사용자의 승인을 **추정해서 적지 않는다.** AI는 사용자가 실제로 보낸 승인 메시지를 "근거" 칸에 인용할 때만 `USER` 줄을 기록할 수 있다 |
-| `INDEPENDENT_REVIEWER` | 작성자와 **다른 컨텍스트**(다른 에이전트·서브에이전트·세션·도구)가 직접 spec/코드를 읽고 판정 |
-| `AUTHOR` | 해당 산출물을 작성한 컨텍스트의 자기 판정 |
+| `USER` | 사람인 사용자. AI는 승인을 **추정해서 적지 않는다.** 사용자가 실제로 보낸 메시지를 근거 칸에 **인용**(일시·승인 범위 포함)할 때만 대신 적을 수 있다 |
+| `REVIEWER` | 작성자와 **다른 컨텍스트**(다른 에이전트·서브에이전트·세션·도구)가 직접 spec/코드를 읽고 판정 |
 
-"이상"의 순서는 `AUTHOR` < `INDEPENDENT_REVIEWER`이다. `USER`가 직접 판정한 줄은 사용자 승인 기록을 포함해 **어느 Gate에서나 유효**하다.
+| Gate | 허용되는 기록자 |
+|---|---|
+| `APPROVAL_SPEC`, `APPROVAL_IMPLEMENTATION`, `ACCEPTANCE` (`workflows/README.md`) | `USER`만 |
+| `PLAN_REVIEW_PASS`, `IMPLEMENTATION_REVIEW_PASS`, `NO_UNRESOLVED_CRITICAL_REDTEAM_FINDINGS`, `TRACEABILITY_COMPLETE`, `NO_CRITICAL_OPEN_ISSUES`, 부트스트랩 `B_FINAL` | `REVIEWER` 또는 `USER`. 작성자가 쓴 줄은 무효 |
+| 그 밖의 Gate (`DISCOVERY_COMPLETE`, `SPEC_READY`, `SPEC_AMBIGUITY_BLOCKERS`, `DESIGN_READY`, `PLAN_READY`, `IMPLEMENTATION_COMPLETE`, `REQUIRED_TESTS_PASS`) | 그 산출물을 만든 단계의 컨텍스트. `IMPLEMENTATION_COMPLETE`·`REQUIRED_TESTS_PASS`는 **verify 컨텍스트**가 기록하며 developer는 기록하지 않는다. 판정자 칸에는 컨텍스트 이름을 적는다. verify가 구현자와 같은 컨텍스트이면 `구현자와 동일`이라고 덧붙인다 (분리가 바람직하지만 필수는 아니다) |
 
-| Gate | 허용되는 판정자 유형 | 기록하는 단계(컨텍스트) |
-|---|---|---|
-| `DISCOVERY_COMPLETE`, `SPEC_READY`, `DESIGN_READY`, `PLAN_READY`, 부트스트랩 `B0_INSPECTED`~`B4_ADAPTERS` | `AUTHOR` 이상 | 그 산출물을 만든 단계 |
-| `SPEC_AMBIGUITY_BLOCKERS = 0` | `AUTHOR` 이상 (blocker가 아닌 질문을 blocker가 아니라고 단정한 근거는 `docs/02_requirements.md`에 남긴다) | clarify |
-| `IMPLEMENTATION_COMPLETE`, `REQUIRED_TESTS_PASS` | `AUTHOR` 이상. **developer는 기록하지 않는다** | **verify 단계의 tester 컨텍스트** (구현 완료 여부는 테스트를 실행하며 확인한 뒤 기록) |
-| `PLAN_REVIEW_PASS`, `IMPLEMENTATION_REVIEW_PASS`, `NO_UNRESOLVED_CRITICAL_REDTEAM_FINDINGS`, `TRACEABILITY_COMPLETE`, `NO_CRITICAL_OPEN_ISSUES`, 부트스트랩 `B_FINAL` | `INDEPENDENT_REVIEWER` 이상 (`AUTHOR`가 쓴 줄은 무효) | 해당 review/red-team/converge 컨텍스트 |
-| 사용자 승인 기록 (`APPROVAL_SPEC`, `APPROVAL_IMPLEMENTATION`, `ACCEPTANCE`)과 면제 기록 (`EXEMPT_APPROVAL_IMPLEMENTATION`, `EXEMPT_ACCEPTANCE`) | **`USER`만** (`workflows/README.md`) | 사용자 (오케스트레이터가 승인 메시지 인용으로 대리 기록) |
+- **대리 기록**: 사용자와 대화하는 메인 컨텍스트(implement를 수행하는 동안은 제외)는 위 줄을 대신 적을 수 있다. 판정자 칸 끝에 `(대리 기록)`을 붙이고, 근거에 사용자 메시지 인용(`USER`) 또는 리뷰어가 **저장한 결과 파일**·사용자가 확인한 리뷰 보고(`REVIEWER`)를 적는다. 근거가 없으면 기록하지 않는다. 읽기 전용 리뷰어는 직접 쓸 수 없으므로 이 경로를 쓴다.
+- 독립 컨텍스트를 만들 수 없으면 리뷰 Gate는 `UNKNOWN`으로 두고 진행하지 않는다. 사용자가 직접 리뷰해 `USER`로 기록하는 것은 유효하다.
 
-`IMPLEMENTATION_COMPLETE`와 `REQUIRED_TESTS_PASS`를 기록하는 verify 컨텍스트가 구현자와 같은 컨텍스트이면 비고에 `구현자와 동일 컨텍스트`라고 적는다. 구현자와 분리된 컨텍스트가 바람직하지만 필수는 아니다. 이 Gate들은 `AUTHOR` 판정을 허용하기 때문이다.
+### 5.3 재판정
 
-독립 컨텍스트를 만들 수 없는 환경에서는 리뷰 Gate를 `UNKNOWN`으로 두고 진행하지 않는다. 사용자가 직접 리뷰하고 `USER`로 기록하는 것은 유효하다.
-
-### 5.3 Gate의 유효성
-
-- 앞 단계 산출물(spec, design, plan)이 어떤 Gate의 "판정 기준" 커밋 **이후에 바뀌었다면** 그 Gate와 그 뒤의 모든 Gate는 **재판정이 필요**하다. (확인: 해당 파일에 대해 `git log <판정 기준>..HEAD`에 변경이 있는지.)
-- `IMPLEMENTATION_REVIEW_PASS`, `NO_UNRESOLVED_CRITICAL_REDTEAM_FINDINGS`, `REQUIRED_TESTS_PASS`, `ACCEPTANCE`는 해당 REQ의 **`code`와 테스트 파일**이 판정 기준 커밋 이후 바뀌었을 때도 재판정이 필요하다. 재판정이 필요한 Gate는 새 줄에 값 `STALE`로 기록하며(값은 `true | false | STALE`), `STALE`인 Gate는 통과로 계산하지 않는다.
-- 값이 숫자인 Gate(`SPEC_AMBIGUITY_BLOCKERS = 0`)는 blocker 수가 0일 때 값 `true`로 기록하고 비고에 `blockers=0`을 적는다.
-- 이 규칙은 자동으로 강제되지 않는다. 규약이며 자동 강제는 `NEXT.md`에 있다.
+- 판정의 근거 커밋 **이후에** 그 Gate가 본 산출물(spec·design·plan)이 바뀌었으면 그 Gate와 뒤 Gate는 재판정이 필요하다. `IMPLEMENTATION_REVIEW_PASS`, `NO_UNRESOLVED_CRITICAL_REDTEAM_FINDINGS`, `REQUIRED_TESTS_PASS`, `ACCEPTANCE`는 REQ의 **`code`와 테스트 파일**이 바뀐 경우도 같다.
+- 확인 방법: `git log <근거 커밋>..HEAD -- <해당 파일>`에 변경이 있는지 본다. 재판정이 필요한 Gate는 통과로 계산하지 않는다. 눈에 보이게 하려면 값 `STALE`인 새 줄을 추가한다.
 
 ### 5.4 한계 (v0.1)
 
-`gates.md`의 판정자 칸은 자유 텍스트이므로 위조를 막지 못한다. 이 규약이 제공하는 것은 **위반을 `git log`/`git diff`로 사후 탐지**할 수 있다는 점뿐이다. 예: implement 단계 커밋이 `gates.md`를 수정했다면 위반이다.
+판정자 칸은 자유 텍스트이므로 위조를 막지 못한다. 이 규약은 위반을 사후에 탐지할 수 있게 할 뿐이며, 자동 강제는 `NEXT.md`에 있다.
 
 ## 6. 누락 탐지 규칙 (수동 검사 절차, 자동화 전)
 

@@ -25,7 +25,7 @@
 ## Traceability
 
 - [ ] 모든 포함 REQ의 상태가 `DONE`으로 계산됨 (`docs/traceability-convention.md` §4)
-- [ ] 사용자 승인 기록 `ACCEPTANCE`가 `gates.md`에 있음 (또는 면제 기록 `EXEMPT_ACCEPTANCE`가 있음) (`workflows/README.md`)
+- [ ] 사용자 승인 기록 `ACCEPTANCE`가 `gates.md`에 있음 (`workflows/README.md`)
 - [ ] `INTENT_UNKNOWN` 항목이 남아 있지 않거나, 남은 항목을 사용자가 인지하고 수용했다
 
 ## 데이터/운영

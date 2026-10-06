@@ -1,18 +1,15 @@
 # Gate Record (project level)
 
 이 프로젝트 자체(프레임워크 부트스트랩)의 Gate 판정 기록. 변경 단위의 Gate는 `specs/<change-id>/gates.md`에 같은 형식으로 기록한다.
-기록 규칙의 단일 출처는 `docs/traceability-convention.md` §5이다. 이 파일은 **기록만** 담는다.
+기록 규칙의 단일 출처는 `docs/traceability-convention.md` §5이다. 이 파일은 **기록만** 담는다. 규칙은 요약·복제하지 않고 위 문서를 가리킨다 (어긋남 방지). 아래 세 항목은 이 파일의 배치 안내다.
 
-## 규칙 요약 (원문은 convention §5)
+- **현재 값** (파일 전체에서 같은 Gate의 가장 아래 줄 기준. 편의용이며 표가 원본이다): `B_FINAL = false`, `DISCOVERY_COMPLETE = STALE`.
+- `B0_INSPECTED`~`B4_ADAPTERS`는 2026-10-05에 **폐지**했다 (`workflows/README.md`). 이력 구역의 해당 줄은 보존하며 현재 값으로 읽지 않는다. 이력 구역의 나머지 줄은 구 형식이어도 기록된 값 그대로 인정한다 (새 형식 요건으로 무효 처리하지 않는다).
+- 새 줄은 **맨 아래 `기록` 표에만** 추가한다. 이력 구역에는 추가하지 않는다.
 
-- **append-only**: 기존 줄을 수정·삭제하지 않는다. 값을 바꾸려면 새 줄을 추가한다. 같은 Gate의 **가장 아래 줄**이 현재 값이다.
-- 판정자 유형은 `USER` / `INDEPENDENT_REVIEWER` / `AUTHOR`. Gate마다 허용되는 유형이 다르다(convention §5). 허용되지 않은 유형이 쓴 줄은 **무효**이며 그 Gate는 `UNKNOWN`으로 본다.
-- implement 단계의 developer는 이 파일을 수정하지 않는다.
-- 값은 `true | false | STALE`. `STALE`은 판정 이후 관련 산출물이 바뀌어 **재판정이 필요**하다는 뜻이며 통과로 계산하지 않는다 (convention §5.3).
-- 메인 세션이 서브에이전트의 판정을 대신 적은 줄은 비고에 `대리 기록`이라고 적는다 (`workflows/README.md`).
-- **현재 값 요약** (가장 아래 줄 기준): `B_FINAL = false`, `B0~B4`와 `DISCOVERY_COMPLETE`는 `STALE`. 이 요약은 편의용이며 아래 표가 원본이다.
+## 이력 (2026-10-05 규칙 단순화 이전, 구 형식 8칸)
 
-## 기록
+기존 줄은 수정하지 않고 그대로 옮겼다.
 
 | 일시 | Gate | 값 | 판정자 유형 | 판정자 | 판정 기준 | 근거 | 비고 |
 |---|---|---|---|---|---|---|---|
@@ -30,3 +27,8 @@
 | 이 줄과 같은 커밋 | B2_WORKFLOW | STALE | AUTHOR | claude-code 세션 | 이 줄과 같은 커밋 | `workflows/` | `workflows/**`가 수정됨 |
 | 이 줄과 같은 커밋 | B3_TRACEABILITY | STALE | AUTHOR | claude-code 세션 | 이 줄과 같은 커밋 | `docs/traceability-convention.md` | 수정됨 |
 | 이 줄과 같은 커밋 | B4_ADAPTERS | STALE | AUTHOR | claude-code 세션 | 이 줄과 같은 커밋 | `adapters/`, `AGENTS.md`, `CLAUDE.md` | `adapters/codex/README.md`, `AGENTS.md`, `CLAUDE.md`가 수정됨 |
+
+## 기록
+
+| 일시 | Gate | 값 | 판정자 | 근거 |
+|---|---|---|---|---|

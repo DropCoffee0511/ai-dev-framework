@@ -24,5 +24,11 @@
 - L1~L4: `docs/discovery.md` 사실 오류 정정
 - Kiro 서술 분리(jasonkneen/kiro SDD, Amazon Kiro), 라이선스 분류 근거의 한계와 `NEEDS LICENSE VERIFICATION` 항목 명시
 
+### Changed (rule simplification, 2026-10-05, user-approved)
+- Gate 기록 규칙을 `docs/traceability-convention.md` §5 한 곳으로 통합 (판정자 유형 `USER`/`REVIEWER` 2종, Gate별 기록자 표 3행, 재판정 규칙 1절로 통합). `workflows/README.md`는 이를 복제하지 않고 가리킴
+- `EXEMPT_*` 면제 제도 폐지, 기능 상태 이름 열(`DRAFT`~`REVIEWED`) 삭제, 부트스트랩 Gate `B0`~`B4` 폐지(`B_FINAL` 하나와 체크리스트만 유지)
+- `docs/gates.md`: 기록 표를 5칸으로 줄이고, 기존 14개 줄은 수정 없이 이력 구역으로 이동
+- 유지: Gate 별도 파일·append-only, 독립 리뷰 필수, 사용자 승인 3곳(`APPROVAL_SPEC`/`APPROVAL_IMPLEMENTATION`/`ACCEPTANCE`), DONE 계산, 테스트 실행 증거
+
 ### Not changed
 - `MASTER_PROMPT.md`, `BOOTSTRAP.md`, `261002 대화내용.txt`

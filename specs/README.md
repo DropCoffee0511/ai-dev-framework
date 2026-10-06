@@ -11,7 +11,9 @@ specs/<change-id>/
 ├─ tasks.md           TASK-### (plan)
 ├─ test-plan.md       테스트 계획 (plan)
 ├─ traceability.md    링크와 상태 (docs/traceability-convention.md)
-└─ review.md          독립 리뷰 결과 (review-plan, review-implementation)
+├─ gates.md           Gate 기록, append-only (docs/traceability-convention.md §5)
+├─ evidence/          테스트 실행 증거 (verify, docs/09_test_cases.md)
+└─ review.md          독립 리뷰 결과 (review-plan, review-implementation, red-team, converge)
 ```
 
 - `<change-id>` 형식(가정): `NNN-short-name` (예: `001-user-login`). 확정되지 않았다.
