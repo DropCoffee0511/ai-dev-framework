@@ -39,7 +39,7 @@ Gate 값은 변경 단위는 `specs/<change-id>/gates.md`, 프로젝트 단위�
 |---|---|---|
 | `APPROVAL_SPEC` | 핵심 업무 규칙(`docs/01_product.md`의 RULE), blocker 질문의 답, 기술 스택 | design으로 진행하지 않는다 |
 | `APPROVAL_IMPLEMENTATION` | 승인된 plan(변경 범위, migration, 영향받는 기존 기능) | implement로 진행하지 않는다 |
-| `ACCEPTANCE` | 실제 사용자 검증 결과 (`MASTER_PROMPT.md` §25) | 기능을 `DONE`으로 보고하지 않는다 |
+| `ACCEPTANCE` | 실제 사용자 검증 결과 (`MASTER_PROMPT.md` §25)와 Definition of Done 확인 (`docs/10_release_checklist.md`) | 기능을 `DONE`으로 보고하지 않는다 |
 
 - 기록자는 `USER`만이다. 기록 방법(메시지 인용, 대리 기록)은 convention §5.2.
 - 승인 뒤에 승인 범위의 spec/plan/코드가 바뀌면 재확인이 필요하다 (convention §5.3).

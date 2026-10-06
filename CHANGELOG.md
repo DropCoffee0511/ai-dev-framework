@@ -32,7 +32,15 @@
 
 ### Added (cross-model audit, 2026-10-06)
 - `docs/audits/audit-002.md`: Codex CLI(`gpt-6.1-sol`) 독립 감사 원문. 대상 `bfbe160`, `B_FINAL = FAIL` (CRITICAL 0, HIGH 4, MEDIUM 12, LOW 3)
-- `docs/gates.md`: `B_FINAL = false` 기록 줄 추가(대리 기록). 지적 사항은 아직 수정하지 않았다
+- `docs/gates.md`: `B_FINAL = false` 기록 줄 추가(대리 기록). 지적 사항은 이 시점에는 수정하지 않았다 (일부는 아래 항목에서 수정)
+
+### Changed (audit-002 HIGH 3건 + 후속 2건 수정, 2026-10-06, user-approved minimal plan. 1차 검증 FAIL(미추적 파일 누락) 후 반영, 2차 검증 PASS)
+- H-01: `traceability.md`는 `spec.md`가 선언한 REQ 전부를 가져야 하고, `acceptance`는 등록된 활성 AC 전부, `permission`·`error_cases`는 등록된 PERM·ERR 전부를 포함해야 함 (빠진 AC는 Requirement `MISSING`, 일부 PERM/ERR는 `PARTIAL`). `docs/traceability-convention.md` §2, §3
+- H-02: 계산할 수 없는 DoD 항목(회귀 테스트·문서 일치·변경 기록)은 `ACCEPTANCE` 근거에 `docs/10_release_checklist.md` 확인을 적도록 연결. `NO_CRITICAL_OPEN_ISSUES`를 미해결 CRITICAL **및 HIGH** 없음으로 해석(MASTER_PROMPT §5.10보다 엄격한 프로젝트 규약, 원문은 미수정). convention §4, §5, `workflows/red-team/README.md`, `docs/10_release_checklist.md`
+- H-03: Gate는 **커밋된 상태**에서만 판정("커밋 전" 허용 삭제), 재판정 확인 명령을 `git diff --stat <근거 커밋> -- <파일>`과 `git status --short -- <파일>` 병행으로 변경(미커밋·미추적 새 파일 포함), 대상에 plan의 "변경할 파일" 추가, plan 목록 밖 공유 모듈은 한계로 명시. convention §5.1, §5.3, §5.4
+- M-03: REQ별 적용 목록 문구를 삭제하고 "Gate는 change 폴더 단위로 범위 전체에 적용, REQ마다 진행이 다르면 change를 나눈다"로 대체
+- M-10: 이력 구역의 구 형식 줄은 통과로 계산하지 않음. `docs/gates.md` 안내 문구도 이에 맞춤 (기록 줄은 수정하지 않음)
+- 미수정: H-04, M-01·M-02·M-04~M-09·M-11·M-12, LOW 전부 (`NEXT.md`). `B_FINAL`은 여전히 `false`
 
 ### Not changed
 - `MASTER_PROMPT.md`, `BOOTSTRAP.md`, `261002 대화내용.txt`

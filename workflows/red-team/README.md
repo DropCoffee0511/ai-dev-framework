@@ -10,4 +10,6 @@
 | 산출물 | red-team 발견 목록 (심각도 포함) |
 | Gate | `NO_UNRESOLVED_CRITICAL_REDTEAM_FINDINGS = true` |
 
+미해결 HIGH 발견은 이 Gate는 막지 않지만 converge의 `NO_CRITICAL_OPEN_ISSUES`를 막는다 (`docs/traceability-convention.md` §5).
+
 

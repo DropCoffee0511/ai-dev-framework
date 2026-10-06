@@ -49,7 +49,9 @@
 - 비어 있는 차원은 `[]`이다. 해당하지 않는 차원은 **이유를 `not_applicable`에 적어야** 한다. 이유 없는 빈 칸은 `MISSING`이다.
 - **`not_applicable`을 쓸 수 있는 차원은 `workflow`, `screen_api`, `data`, `permission`, `error_cases`뿐이다.** Requirement(`acceptance`), Tests, Implementation, Review는 해당 없음이 될 수 없다 (Review는 `traceability.md`에 값이 없고 `gates.md`에서 계산된다).
 - 모든 링크 대상 ID는 정의 위치에 실제로 존재해야 한다 (dangling reference 금지).
-- `acceptance`의 모든 AC는 하나 이상의 TC를 가져야 한다.
+- **범위**: 변경의 REQ 목록은 `specs/<change-id>/spec.md`가 선언하고, `traceability.md`는 그 REQ 전부의 항목을 가져야 한다. 항목이 없는 REQ는 `MISSING`이다.
+- `acceptance`의 키는 `docs/02_requirements.md`에 등록된 그 REQ의 **활성 AC 전부**(`RETIRED` 제외)여야 하고, 각 AC는 하나 이상의 TC를 가져야 한다. 빠진 AC가 있으면 Requirement는 `MISSING`이다.
+- `permission`·`error_cases`는 같은 문서의 REQ 상세 블록(권한·예외 상황 칸)에 적힌 PERM·ERR **전부**를 포함해야 한다. 일부만 연결하면 해당 차원은 `PARTIAL`이다.
 - `permission`에 연결된 PERM마다 권한 테스트 TC(`docs/06_permissions.md` 필수 권한 테스트 표)가, `error_cases`에 연결된 ERR마다 그 ERR의 테스트 TC가 `tests`에 포함되어야 한다.
 - `code` 경로는 저장소에 존재하는 파일이어야 한다.
 
@@ -59,12 +61,12 @@
 
 | 차원 | MISSING | PARTIAL | PASS |
 |---|---|---|---|
-| Requirement | `acceptance`가 비어 있음 | AC 중 검증 불가능한 문구가 있음 | AC가 1개 이상이고 모두 검증 가능 |
+| Requirement | `acceptance`가 비어 있거나 등록된 활성 AC 중 빠진 것이 있음 | AC 중 검증 불가능한 문구가 있음 | AC가 1개 이상이고 모두 검증 가능 |
 | Workflow | 연결도 `not_applicable` 사유도 없음 | — | 연결 또는 사유 있음 |
 | Screen/API | 연결도 사유도 없음 | 화면만 있고 대응 API가 없음(또는 반대) | 연결 또는 사유 있음 |
 | Data | 연결도 사유도 없음 | — | 연결 또는 사유 있음 |
-| Permission | 연결도 사유도 없음 | 권한은 있으나 서버/API 검사 위치가 없음 | 연결(서버 검사 위치 포함) 또는 사유 있음 |
-| Error Cases | 연결도 사유도 없음 | — | 연결 또는 사유 있음 |
+| Permission | 연결도 사유도 없음 | 권한은 있으나 서버/API 검사 위치가 없음, 또는 등록된 PERM 일부만 연결 | 연결(서버 검사 위치 포함) 또는 사유 있음 |
+| Error Cases | 연결도 사유도 없음 | 등록된 ERR 일부만 연결 | 연결 또는 사유 있음 |
 | Tests | `tests`가 비어 있거나, AC·PERM·ERR 중 TC가 없는 항목이 있음 | TC가 있으나 일부가 `NOT RUN` 또는 `FAIL` (전부 FAIL 포함) | 필요한 모든 TC가 **실제 실행되어 PASS** |
 | Implementation | `code`가 비어 있음 | 일부 TASK 미완료 | 모든 TASK 완료 + `code` 연결 |
 | Review | `gates.md`의 `IMPLEMENTATION_REVIEW_PASS` 가장 아래 줄이 유효하고 값이 `false` | 유효한 기록이 없음 (`UNKNOWN`) 또는 §5.3에 따라 재판정이 필요함 | `gates.md`의 `IMPLEMENTATION_REVIEW_PASS` 가장 아래 줄이 유효(§5.2, §5.3)하고 값이 `true` (독립 리뷰, Critical/High 없음) |
@@ -84,22 +86,24 @@ else                                → NOT READY   (방어용: 위 표로 계�
 - **실행 증거가 없는 PASS는 `NOT RUN`으로 취급한다.** 결과에는 실행 일시, 실행한 명령, 실행 시점의 커밋, 증거 경로(로그 등)가 있어야 한다 (`docs/09_test_cases.md`). 코드가 증거의 커밋 이후 바뀌었다면 그 PASS는 재실행이 필요하다.
 - TC는 실제 테스트 코드와 연결되어야 한다: 테스트 이름이나 주석에 TC ID를 넣고(예: `[TC-104]`), `docs/09_test_cases.md`의 "테스트 코드 위치" 칸에 파일 경로를 적는다. 자동화 테스트가 없는 TC(수동 테스트)는 그렇게 표시하고, 증거로 실행 절차와 관찰 결과 기록을 둔다.
 - 리뷰 기록이 아직 없는 REQ는 `IN PROGRESS`이다 (`NOT READY`가 아니다). 유효한 `IMPLEMENTATION_REVIEW_PASS = false`가 있으면 `NOT READY`이다.
-- 계산된 `DONE`은 **구현·추적 상태**일 뿐이다. 기능을 완료로 **보고**하려면 사용자 승인 기록 `ACCEPTANCE`가 추가로 필요하다 (`workflows/README.md` 사용자 승인 기록).
+- 계산된 `DONE`은 **구현·추적 상태**일 뿐이다. 기능을 완료로 **보고**하려면 사용자 승인 기록 `ACCEPTANCE`가 추가로 필요하다 (`workflows/README.md` 사용자 승인 기록). 계산하지 못하는 DoD 항목(회귀 테스트, 문서·구현 일치, 변경 기록)은 `docs/10_release_checklist.md`로 확인하고, `ACCEPTANCE` 줄의 근거에 그 확인을 적는다.
 
 ## 5. Gate 기록 규칙 (이 규약의 단일 출처)
 
 다른 문서(`workflows/README.md`, 어댑터 등)는 이 절을 복제하지 않고 가리킨다.
 
 - `TRACEABILITY_COMPLETE`(`workflows/converge`)는 **범위 안의 모든 REQ가 `DONE`으로 계산되고 `INTENT_UNKNOWN`이 사용자에게 인지되어 있을 때** 참이다. (`MASTER_PROMPT.md` §5.11의 Gate에 대한 이 규약의 해석이다.)
+- `NO_CRITICAL_OPEN_ISSUES`는 모든 리뷰·red-team 기록에 **미해결 CRITICAL과 HIGH가 모두 없을 때** 참이다. `MASTER_PROMPT.md` §6의 "Critical/High blocker 없음"에 맞춘 해석이며, §5.10의 red-team Gate는 CRITICAL만 말하므로 이 규약이 더 엄격하다 (원문 개정은 사용자 결정, `NEXT.md`).
 
 ### 5.1 기록 위치와 형식
 
 - Gate 값은 `traceability.md`가 아니라 **별도 파일**에 기록한다. 구현자가 수정하는 파일에 두면 구현자가 리뷰 Gate를 고칠 수 있기 때문이다.
-  - 변경 단위: `specs/<change-id>/gates.md` (그 REQ의 `traceability.md`와 같은 폴더의 것만 읽는다. 한 폴더에 REQ가 둘 이상이면 모든 Gate 줄의 근거 칸에 적용 REQ 목록을 적는다. 목록이 없는 줄은 어느 REQ에도 적용되지 않는다(`UNKNOWN`). REQ가 하나뿐이면 생략할 수 있다). 규칙 단순화 이전 이력 구역의 구 형식 줄은 기록된 값 그대로 인정한다(`docs/gates.md`)
+  - 변경 단위: `specs/<change-id>/gates.md` (그 REQ의 `traceability.md`와 같은 폴더의 것만 읽는다). Gate는 change 폴더 단위로 범위(§2의 REQ 목록) 전체에 함께 적용한다. REQ마다 진행이 다르면 change를 나눈다
   - 프로젝트 단위(부트스트랩 등): `docs/gates.md`
 - 표의 칸: `일시 | Gate | 값 | 판정자 | 근거`
   - 값: `true | false | STALE` (숫자 Gate `SPEC_AMBIGUITY_BLOCKERS = 0`은 blocker가 0이면 `true`)
-  - 근거: 판정 시점의 **git 커밋 해시**(커밋 전이면 "커밋 전")와 증거(파일 경로 또는 사용자 메시지 인용)
+  - 근거: 판정이 본 **커밋된 상태**의 git 커밋 해시와 증거(파일 경로 또는 사용자 메시지 인용). 그 Gate가 검토한 산출물(§5.3의 대상 파일)에 미커밋 변경이 있는 상태에서는 판정하지 않는다(그때 쓴 줄은 무효). 판정 단계 자신의 산출물(리뷰·테스트 결과 파일, `gates.md`)은 제외한다
+- **이력 구역**: 규칙 단순화 이전의 구 형식 줄(`docs/gates.md` 이력 구역)은 읽을 수 있지만 통과로 계산하지 않는다(`STALE`과 같은 취급). 현재 값은 맨 아래 `기록` 표의 줄로만 정한다.
 - **append-only**: 기존 줄을 수정·삭제하지 않는다. 값을 바꾸려면 새 줄을 추가하고, 같은 Gate의 **가장 아래 줄**이 현재 값이다.
 - 기록이 없거나 아래 판정자 규칙을 어긴 줄만 있으면 그 Gate는 `UNKNOWN`이다. 에이전트는 진행하지 않고 그렇게 보고한다.
 - implement 단계의 developer는 `gates.md`를 수정하지 않는다. 위반은 `git log`/`git diff`로 사후 탐지한다.
@@ -124,12 +128,12 @@ else                                → NOT READY   (방어용: 위 표로 계�
 
 ### 5.3 재판정
 
-- 판정의 근거 커밋 **이후에** 그 Gate가 본 산출물(spec·design·plan)이 바뀌었으면 그 Gate와 뒤 Gate는 재판정이 필요하다. `IMPLEMENTATION_REVIEW_PASS`, `NO_UNRESOLVED_CRITICAL_REDTEAM_FINDINGS`, `REQUIRED_TESTS_PASS`, `ACCEPTANCE`는 REQ의 **`code`와 테스트 파일**이 바뀐 경우도 같다.
-- 확인 방법: `git log <근거 커밋>..HEAD -- <해당 파일>`에 변경이 있는지 본다. 재판정이 필요한 Gate는 통과로 계산하지 않는다. 눈에 보이게 하려면 값 `STALE`인 새 줄을 추가한다.
+- 판정의 근거 커밋 **이후에** 그 Gate가 본 산출물(spec·design·plan)이 바뀌었으면 그 Gate와 뒤 Gate는 재판정이 필요하다. `IMPLEMENTATION_REVIEW_PASS`, `NO_UNRESOLVED_CRITICAL_REDTEAM_FINDINGS`, `REQUIRED_TESTS_PASS`, `ACCEPTANCE`는 REQ의 **`code`·테스트 파일과 plan의 "변경할 파일"**이 바뀐 경우도 같다.
+- 확인 방법: `git diff --stat <근거 커밋> -- <해당 파일>`(커밋된 변경과 추적 중인 파일의 미커밋 변경)과 `git status --short -- <해당 파일>`(새로 만들어 아직 추적되지 않은 파일은 `??`로 나온다) **둘 다**에 변경이 없는지 본다. 재판정이 필요한 Gate는 통과로 계산하지 않는다. 눈에 보이게 하려면 값 `STALE`인 새 줄을 추가한다.
 
 ### 5.4 한계 (v0.1)
 
-판정자 칸은 자유 텍스트이므로 위조를 막지 못한다. 이 규약은 위반을 사후에 탐지할 수 있게 할 뿐이며, 자동 강제는 `NEXT.md`에 있다.
+판정자 칸은 자유 텍스트이므로 위조를 막지 못한다. 이 규약은 위반을 사후에 탐지할 수 있게 할 뿐이며, 자동 강제는 `NEXT.md`에 있다. 또 plan의 파일 목록에 없는 공유 모듈(인증 등)의 변경은 §5.3으로 탐지되지 않는다.
 
 ## 6. 누락 탐지 규칙 (수동 검사 절차, 자동화 전)
 
