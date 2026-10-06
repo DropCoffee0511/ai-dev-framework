@@ -42,5 +42,10 @@
 - M-10: 이력 구역의 구 형식 줄은 통과로 계산하지 않음. `docs/gates.md` 안내 문구도 이에 맞춤 (기록 줄은 수정하지 않음)
 - 미수정: H-04, M-01·M-02·M-04~M-09·M-11·M-12, LOW 전부 (`NEXT.md`). `B_FINAL`은 여전히 `false`
 
+### Added (audit-002 H-04, 2026-10-06, user-approved plan A)
+- `ADOPTING.md`: 다른 프로젝트에 적용하는 방법. 복사 허용 목록(allowlist), 대상이 자기 것으로 만드는 파일, 가져가지 않을 파일, 진입 파일 블록, Greenfield/Brownfield 절차, 출처·라이선스 기록, 수동 확인표, 한계
+- `README.md`: 구조 목록과 사용 방법에 `ADOPTING.md` 안내 추가
+- 폴더는 옮기지 않았다. 템플릿과 자체 기록의 물리적 분리는 `NEXT.md`의 사용자 결정 사항이다. 검증자 3회(1차 FAIL MEDIUM 3건, 2차 FAIL MEDIUM 1건 반영 후 3차 PASS)
+
 ### Not changed
 - `MASTER_PROMPT.md`, `BOOTSTRAP.md`, `261002 대화내용.txt`

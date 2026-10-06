@@ -13,6 +13,7 @@ AI 코딩 도구(Claude Code, Codex CLI 등)로 개발할 때 **요구사항·�
 ```text
 MASTER_PROMPT.md        최상위 운영 규칙 (모든 규칙의 단일 출처)
 BOOTSTRAP.md            첫 실행 지시
+ADOPTING.md             다른 프로젝트에 적용하는 방법 (복사 허용 목록, Greenfield/Brownfield 절차)
 constitution/           원칙
 docs/                   01~10 문서 템플릿, discovery.md, traceability-convention.md
 specs/                  변경 단위 명세 (specs/README.md)
@@ -27,8 +28,8 @@ NEXT.md                 다음 작업
 
 ## 사용 방법 (v0.1)
 
-1. AI 에이전트를 이 저장소 루트에서 실행한다.
-2. 에이전트에게 `MASTER_PROMPT.md`를 읽고 따르라고 지시한다 (`CLAUDE.md`/`AGENTS.md`가 자동으로 안내한다).
+1. **다른 프로젝트에 적용하려면 `ADOPTING.md`를 먼저 읽는다.** 이 저장소를 그대로 앱 저장소로 쓰지 않는다 (이 저장소 자체의 기록이 섞여 있다).
+2. 이 저장소 자체를 작업할 때는 AI 에이전트를 이 저장소 루트에서 실행하고, `MASTER_PROMPT.md`를 읽고 따르라고 지시한다 (`CLAUDE.md`/`AGENTS.md`가 자동으로 안내한다).
 3. 개발 흐름은 `discover → specify → clarify → design → plan → review-plan → implement → verify → review-implementation → red-team → converge` 순서이며, 각 단계의 Gate를 통과해야 다음으로 넘어간다 (`workflows/README.md`).
 4. 기능은 `docs/traceability-convention.md`의 규칙으로 요구사항부터 코드·테스트까지 연결되어야 완료로 본다.
 
