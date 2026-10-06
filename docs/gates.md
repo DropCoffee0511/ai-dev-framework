@@ -32,3 +32,4 @@
 
 | 일시 | Gate | 값 | 판정자 | 근거 |
 |---|---|---|---|---|
+| 2026-10-06 | B_FINAL | false | REVIEWER codex gpt-6.1-sol (대리 기록) | 대상 커밋 `bfbe160`. 저장된 결과 파일 `docs/audits/audit-002.md` (CRITICAL 0, HIGH 4, MEDIUM 12, LOW 3). 읽기 전용 샌드박스 감사 |

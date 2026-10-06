@@ -30,5 +30,9 @@
 - `docs/gates.md`: 기록 표를 5칸으로 줄이고, 기존 14개 줄은 수정 없이 이력 구역으로 이동
 - 유지: Gate 별도 파일·append-only, 독립 리뷰 필수, 사용자 승인 3곳(`APPROVAL_SPEC`/`APPROVAL_IMPLEMENTATION`/`ACCEPTANCE`), DONE 계산, 테스트 실행 증거
 
+### Added (cross-model audit, 2026-10-06)
+- `docs/audits/audit-002.md`: Codex CLI(`gpt-6.1-sol`) 독립 감사 원문. 대상 `bfbe160`, `B_FINAL = FAIL` (CRITICAL 0, HIGH 4, MEDIUM 12, LOW 3)
+- `docs/gates.md`: `B_FINAL = false` 기록 줄 추가(대리 기록). 지적 사항은 아직 수정하지 않았다
+
 ### Not changed
 - `MASTER_PROMPT.md`, `BOOTSTRAP.md`, `261002 대화내용.txt`
