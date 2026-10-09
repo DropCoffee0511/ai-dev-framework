@@ -47,5 +47,9 @@
 - `README.md`: 구조 목록과 사용 방법에 `ADOPTING.md` 안내 추가
 - 폴더는 옮기지 않았다. 템플릿과 자체 기록의 물리적 분리는 `NEXT.md`의 사용자 결정 사항이다. 검증자 3회(1차 FAIL MEDIUM 3건, 2차 FAIL MEDIUM 1건 반영 후 3차 PASS)
 
+### Added (audit-001 2차 반영분 재검증, 2026-10-09)
+- `docs/audits/audit-verification-2026-10-09.md`: audit-001 수정분 2차 검증(HIGH 2·MEDIUM 5) 반영분의 재검증 보고(판정 원문 포함). 새 컨텍스트 리뷰어 2명(규약 정합성·약화·우회 렌즈)이 커밋 `a33e74f`를 `git show`로 고정 판독해 HIGH 2건과 열거된 MEDIUM 3건을 전부 RESOLVED, 종합 CLEAR로 판정. 새 CRITICAL/HIGH 없음. 열거되지 않은 MEDIUM 2건은 원 보고 미보존으로 판정 불가
+- `NEXT.md`: 진행 중 항목의 "2차 지적 반영분 미재검증"을 재검증 결과로 갱신
+
 ### Not changed
 - `MASTER_PROMPT.md`, `BOOTSTRAP.md`, `261002 대화내용.txt`
