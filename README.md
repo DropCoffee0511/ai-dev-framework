@@ -2,7 +2,7 @@
 
 AI 코딩 도구(Claude Code, Codex CLI 등)로 개발할 때 **요구사항·업무흐름·데이터·권한·예외·테스트·완료조건을 먼저 명확히 하고, 명세에 맞는 최소 변경만 구현한 뒤 독립 리뷰까지 통과**하도록 만드는 운영 프레임워크.
 
-> 상태: **v0.1 초안 (문서 전용, 검증 진행 중)**. 소스코드·CLI·자동 검사는 아직 없다. 독립 감사 2건(`docs/audits/audit-001.md`, `docs/audits/audit-002.md`)이 모두 `B_FINAL = FAIL`이었고, 지적의 일부를 고친 상태다. 현재 Gate 값은 `docs/gates.md`, 남은 작업은 `NEXT.md`에 있다. 프로젝트 이름은 작업명이며 확정되지 않았다 (`docs/discovery.md` A1).
+> 상태: **v0.1 초안 (문서 전용, 검증 진행 중)**. 소스코드·CLI는 아직 없다. Traceability 검사 스크립트 1개가 있다(`scripts/check_traceability.py`, python3 표준 라이브러리만 사용). 독립 감사 2건(`docs/audits/audit-001.md`, `docs/audits/audit-002.md`)이 모두 `B_FINAL = FAIL`이었고, 지적의 일부를 고친 상태다. 현재 Gate 값은 `docs/gates.md`, 남은 작업은 `NEXT.md`에 있다. 프로젝트 이름은 작업명이며 확정되지 않았다 (`docs/discovery.md` A1).
 
 ## 해결하려는 문제
 
@@ -19,6 +19,7 @@ docs/                   01~10 문서 템플릿(대상 프로젝트용), traceabi
                         그리고 이 저장소 자체의 기록: discovery.md, gates.md, audits/ (ADOPTING.md §1)
 specs/                  변경 단위 명세 (specs/README.md)
 workflows/              11단계 개발 흐름의 입력·산출물·Gate
+scripts/                traceability 검사 스크립트 (`docs/traceability-convention.md` §3–§5 계산)
 adapters/               Claude Code / Codex CLI 진입 전략
 CLAUDE.md, AGENTS.md    도구별 얇은 진입 파일 (규칙은 MASTER_PROMPT.md를 가리킴)
 LICENSE                 MIT

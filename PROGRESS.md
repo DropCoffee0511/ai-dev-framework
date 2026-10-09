@@ -1,0 +1,53 @@
+# PROGRESS — 자율 루프 진행 기록
+
+상태의 기준 파일은 이 문서 하나다. 백로그는 `NEXT.md`, Gate 판정은 `docs/gates.md`이며 진행 상태를 여기서 따로 복제하지 않는다. 루프 규칙은 `AUTOPILOT.md`, 웨이브 기록 규약은 그 §8이다.
+
+이 브랜치(`feature/traceability-script`, main `a33e74f` 기준)는 wave 002 전용이다. wave 001 기록은 `feature/audit-001-reverify` 브랜치(미푸시 2커밋)에서 이어 받아 아래 웨이브 기록에 보존했다.
+
+## 최근 요약 (wave 002)
+
+- 최종 갱신: 2026-10-09 20:20 KST
+- 이번 과제: `NEXT.md` 구현 후보 2 — Traceability 검사 스크립트
+- 상태: **진행 중** (아래 스프린트 카드·웨이브 기록 참조)
+
+## 스프린트 카드 (wave 002)
+
+- 과제 ID: `NEXT.md` 구현 후보 2 — "`docs/traceability-convention.md` §3–§5를 자동 계산. 입력은 Markdown/YAML"
+- 문제: convention §3 차원 판정·§4 상태 계산·§5 Gate 기록 판독이 전부 수동이라 계산 누락·실수·우회가 가능하다 (`docs/discovery.md` R3의 하위 문제)
+- 이번 결과: 단일 파일 스크립트(python3 표준 라이브러리만)가 traceability.md의 REQ별 차원·상태와 gates.md 기록의 현재 값을 계산하고, 내장 시험(--self-test)과 자기 저장소 적용으로 검증된다
+- 범위: `scripts/check_traceability.py`(신규), `docs/traceability-convention.md`(도입 안내 1줄 포인터), `CHANGELOG.md`, `NEXT.md`, `README.md`·`AGENTS.md` 상태 문구 최소 갱신, 이 파일. 규칙 본문(convention §1–§7 내용)은 변경하지 않는다
+- 규칙 순증가 목표: ≤3줄 (convention 안내 1줄 + README 구조 목록 1줄. 규칙 추가 없음 — 스크립트는 규약의 계산기일 뿐이다)
+- 불변식 영향(`AUTOPILOT.md` §2): 규칙 단일 출처 유지(스크립트가 규칙을 새로 정의하지 않고 convention §3–§5를 계산), 최소 증가(위 목표), 템플릿·자기 기록 분리(`scripts/`는 양쪽 아님), 버전·이력 일치(CHANGELOG·README·AGENTS 갱신), 추적 가능성(`NEXT.md` 구현 후보 2와 연결)
+- 수용 조건:
+  1. 스크립트는 python3 표준 라이브러리만 쓰는 단일 파일이다 (외부 의존성·manifest 0)
+  2. `--self-test`가 §3 차원 판정(PASS/PARTIAL/MISSING)·§4 상태 계산(DONE/IN PROGRESS/NOT READY)·§5 기록 유효성(5칸, 값, 판정자 유형, 맨 아래 줄, 이력 구역 무시, STALE) 사례를 전부 통과한다
+  3. 자기 저장소 적용: 저장소 루트에서 실행해 `docs/gates.md` 기록 표를 판독하고(B_FINAL=false 유효 줄, 이력 구역 무시) 구조 위반 0건으로 종료한다
+  4. 4종 문서 게이트 통과, `CHANGELOG.md`·`NEXT.md` 기록 갱신 후 작업 브랜치 커밋 (push는 승인 대상)
+  5. dynamic-workflow 독립 리뷰를 받는다 (지연 시 검토 대기 등재와 경로·상태 기록까지)
+- 확인 수단: `--self-test` + 자기 저장소 실행 출력 + 4종 문서 게이트(`AUTOPILOT.md` §3.1) + dynamic-workflow 독립 리뷰어
+
+## 웨이브 기록
+
+### wave 002 — 구현 후보 2: Traceability 검사 스크립트 (2026-10-09, 진행 중)
+
+- (웨이브 종료 시 기록)
+
+### wave 001 — audit-001 2차 지적 반영분 재검증 (2026-10-09, 완료)
+
+- 최종 갱신: 2026-10-09 19:57 KST / 과제: audit-001 2차 반영분 재검증 / 상태: 완료(미푸시)
+- 변경한 문서: 검증 보고 신규 1개 + `NEXT.md`·`CHANGELOG.md`·`PROGRESS.md` 갱신. 규칙 순증가 0줄
+- 4종 게이트: 전부 통과. 게이트 1·2 전체 스캔 통과(09:54 최초, 19:55 재실행, 오탐 0건). 게이트 3 통과(변경 4문서의 §-참조 대조). 게이트 4 통과(CHANGELOG [Unreleased] 갱신). 조건부 게이트: ② README "상태·현재 한계" 대조 — 현실과 일치해 변경 불필요. ① workflows 대조·③ gates.md convention 대조 — 해당 문서를 건드리지 않아 미해당
+- 독립 검토: dynamic-workflow 리뷰어 2명(각자 새 컨텍스트, 읽기 전용, `GLM-5.3-Flash$high`) — HIGH 2건 + 열거된 MEDIUM 3건 전부 **RESOLVED**, 규칙 약화 없음, 종합 **CLEAR**, 새 CRITICAL/HIGH 없음 (run `dwfrun-f4f2d763`, 1-페이즈, 커밋-핀 `git show` 판독). claude/codex CLI는 평일 08:00–18:00 호출 금지 조항과 크레딧·세션 상태 때문에 미사용(§7 우선순위대로 dynamic-workflow가 기본 경로)
+- 도구로 확인한 근거: 리뷰어 2명의 판정 원문(항목별 file:line)을 캐시 재생으로 전문 회수해 보고 파일에 기록. 메인 세션이 convention L131–132·L104·L106·L113·L120–124, `workflows/README.md` L45를 표본 대조해 리뷰어 인용의 일치를 확인
+- 이슈: 리뷰 워크플로가 호스트 큐 대기로 벽시시간 약 9시간 소요(디스패치 09:55 → 완료 19:44 KST). 실제 작업 시간과 구분되며, 스프린트 예산(50분) 초과분은 대기 시간이다. 이로 인해 스프린트 2 이후는 진행하지 않고 이번 세션은 wave 001 완료로 종료
+- 유지보수: 없음 (과제 작업만 수행)
+- 커밋: 브랜치 `feature/audit-001-reverify`에 미푸시 2커밋 — `4c6c4c6`(audit 보고) + progress 기록 커밋. push는 사용자 승인 대상
+- 블로커: 없음. 다음 시도 조건: 없음
+- 다음 실행의 첫 작업: `git fetch`로 origin/main 대조 후 §3.2-e 구현 후보 2(Traceability 검사 스크립트) 착수 — 이번 웨이브에서 수행 중
+
+#### wave 001 스프린트 카드 (참고용 보존)
+
+- 과제 ID: audit-001 2차 지적 반영분 재검증 (`NEXT.md` "진행 중 / 보류")
+- 수용 조건 충족: 리뷰어 2명 항목별 RESOLVED + file:line 근거 ✅ / 규칙 약화 판단 확인(weakened=false 전 항목) ✅ / 검증 보고 `docs/audits/audit-verification-2026-10-09.md` 저장·`NEXT.md` 연결 ✅ / CHANGELOG [Unreleased] 기록 ✅ / 게이트 통과 후 커밋 ✅
+- 규칙 순증가: 0줄 (기록 추가뿐)
+- 검증 대상 커밋: `a33e74f`

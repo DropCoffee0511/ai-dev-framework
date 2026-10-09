@@ -1,6 +1,6 @@
 # Traceability Convention (v0.1)
 
-`MASTER_PROMPT.md` §7의 Traceability Matrix를 **파일로 표현하는 규약**이다. 형식은 Markdown + YAML이며, 검사 스크립트는 v0.1 범위 밖이다 (`docs/discovery.md` A4, `NEXT.md`).
+`MASTER_PROMPT.md` §7의 Traceability Matrix를 **파일로 표현하는 규약**이다. 형식은 Markdown + YAML이다. 검사 스크립트는 v0.1 범위 밖으로 `NEXT.md`에 이월했다가, 2026-10-09에 구현 후보 2로 `scripts/check_traceability.py`(§3–§5 계산)를 추가했다. 이 스크립트는 계산기일 뿐이며 규칙의 단일 출처는 이 문서다 (`docs/discovery.md` A4).
 
 ## 1. ID 규칙
 

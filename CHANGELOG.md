@@ -47,5 +47,8 @@
 - `README.md`: 구조 목록과 사용 방법에 `ADOPTING.md` 안내 추가
 - 폴더는 옮기지 않았다. 템플릿과 자체 기록의 물리적 분리는 `NEXT.md`의 사용자 결정 사항이다. 검증자 3회(1차 FAIL MEDIUM 3건, 2차 FAIL MEDIUM 1건 반영 후 3차 PASS)
 
+### Added (traceability check script, 2026-10-09)
+- `scripts/check_traceability.py`: `docs/traceability-convention.md` §3–§5 자동 계산 (`NEXT.md` 구현 후보 2). 단일 파일, python3 표준 라이브러리만 사용(외부 의존성 0). REQ별 차원 판정(§3)·상태 계산(§4), `gates.md` 기록 표 판독(맨 아래 유효 줄, 이력 구역 제외, 판정자 규칙 §5.2), Review 차원의 커밋-핀 재판정 확인(§5.3), 계산 못 하는 항목은 보수적으로 PARTIAL/MISSING 처리. `--self-test` 내장 시험 21건 통과. 자기 저장소 적용: `docs/gates.md`에서 `B_FINAL = false` 판독, 구조 위반 0건. 계산기이며 규칙의 단일 출처는 convention이다 — 규칙 문서 변경은 도입 안내 1문장뿐이다
+
 ### Not changed
 - `MASTER_PROMPT.md`, `BOOTSTRAP.md`, `261002 대화내용.txt`
