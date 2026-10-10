@@ -93,6 +93,7 @@
 - 1차 재검토 판정: 런 `dwfrun-76f40125` — 잔여 지적 15건 전부 RESOLVED(검증자 2명 일치), 규칙 약화 없음, 규칙 무결성 CLEAR, 결정론적 게이트 통과. 단 수정 검증자가 **신규 HIGH 1건(NEW-1)을 실행으로 재현**해 종합 FAIL. 전문은 `docs/audits/wave002-residual-review-2026-10-11.md`(항목별 표 전문은 런 아티팩트 보존 — 회수 비용으로 반환값 기반 작성을 명시)
 - NEW-1(HIGH·verified): R2 수정에서 넣은 헤더 판정 `cells[0] == 'ID' or any('대상' in c for c in cells)`이 데이터 행의 임의 칸에 '대상'이 있으면(절차 칸 "대상 화면 진입 후 입력") 그 행을 헤더로 오판 — TC가 결과 집계에서 탈락(NOT RUN→Tests PARTIAL)하고 `tc_target_col`이 어긋나 이후 행들도 잘못 읽음
 - 수정(스크립트만 — 규칙 문서 0줄): 헤더 판정을 첫 칸이 정확히 'ID'인 행으로 한정. self-test 사례 11 추가(44건→47건): DONE 유지·TC-001 집계 유지·대상 칸 위치 유지 3건. 수정 후 검증자 재현 시나리오를 동일 픽스처로 재실행해 REQ-001=DONE·col=2·위반 0건 확인
+- 2차 재검토 접수: 런 `dwfrun-12ca5a04`(NEW-1 해소·R2 원 요구 유지·회귀·기록 일치를 검증자 2명이 판정, `GLM-5.3-Flash$high`, 초안 `.zcode/workflow-drafts/wave-002-잔여지적-재검토2-커밋-71f085d.dwf.ts`). 판정 수신 시 이 항목에 결과를 덧붙인다
 - 유지보수: 없음. 커밋: fix(NEW-1) + 기록(보고·CHANGELOG·NEXT·이 항목) — 전부 미푸시
 - 블로커: 없음. 다음 실행의 첫 작업: 2차 재검토 판정 수신 → APPROVE면 wave 002 완전 종결, FAIL이면 지적 반영
 
