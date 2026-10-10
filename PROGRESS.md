@@ -6,12 +6,12 @@
 
 ## 최근 요약 (wave 002)
 
-- 최종 갱신: 2026-10-11 01:2X KST (웨이브 8 세션 — 재검토 판정 수신 계속)
+- 최종 갱신: 2026-10-11 02:1X KST (웨이브 8 세션 — 2차 재검토 판정 수신)
 - 이번 과제: wave 002 잔여 지적 흡수(편의 개선 1~4단계) + 사용자 샘플 테스트 준비(5단계)
-- 상태: **1차 재검토 FAIL(신규 HIGH 1건) 반영 완료·2차 재검토 대기** — 1차 재검토(런 `dwfrun-76f40125`)는 지적 15건 전부 RESOLVED·규칙 무결성 CLEAR였으나 R2 헤더 판정의 데이터 행 오판(NEW-1, HIGH·verified)을 발견해 FAIL이었다. 헤더 판정을 첫 칸 'ID' 행으로 한정하고 self-test 사례 11을 추가해(47건) 수정했다. 보고는 `docs/audits/wave002-residual-review-2026-10-11.md`
-- 커밋(브랜치 `feature/traceability-script`, 전부 미푸시 — push는 사용자 승인 대상): wave 002 본 작업 `3477dd6`→…→`2e536d0`(기록) + 흡수 `4ba3c2c`(fix)·`8b40410`·`2611d22`(기록) + 이번 NEW-1 fix·기록 2건(아래)
-- 규칙 순증가: 이번 세션 1줄(ADOPTING.md §1 복사함 목록의 `scripts/check_traceability.py` — 근거는 `NEXT.md`·`CHANGELOG.md`). 규칙 문서(convention·MASTER_PROMPT·workflows·docs/01~10) 변경 0줄. wave 002 누적 3줄
-- 다음 실행의 첫 작업: 2차 재검토 판정 수신 → APPROVE면 wave 002 완전 종결 기록, FAIL이면 지적 반영 → 사용자 샘플 프로젝트 테스트 지원(메뉴얼 3단계)
+- 상태: **완료·종결** — 1차 재검토(`dwfrun-76f40125`)의 신규 HIGH 1건(NEW-1)을 `71f085d`에서 수정했고, 2차 재검토(런 `dwfrun-12ca5a04`)가 수정 검증 4/4·규칙 무결성 CLEAR(규칙 약화 0건·새 CRITICAL/HIGH 0건)로 확인했다. 판정식이 FAIL로 출력한 RECORDS 1건(감사 보고 ↔ 반환값 직접 대조 불가)은 메인 세션이 검증자 지정 대조를 수행해 전 항목 일치로 닫았다. 잔여 지적 15건 흡수 + NEW-1까지 완결. 보고는 `docs/audits/wave002-residual-review-2026-10-11.md`·`wave002-residual-reverify2-2026-10-11.md`
+- 커밋(브랜치 `feature/traceability-script`, 전부 미푸시 — push는 사용자 승인 대상): wave 002 본 작업 `3477dd6`→…→`2e536d0`(기록) + 흡수 `4ba3c2c`(fix)·`8b40410`·`2611d22`(기록) + NEW-1 `71f085d`(fix)·`a97965c`·`6490953`(기록) + 종결 기록 커밋(아래)
+- 규칙 순증가: 이번 세션 1줄(ADOPTING.md §1 복사함 목록의 `scripts/check_traceability.py`). 규칙 문서(convention·MASTER_PROMPT·workflows·docs/01~10) 변경 0줄 — 2차 무결성 검증자가 19경로 git diff 0줄로 직접 확인. wave 002 누적 3줄
+- 다음 실행의 첫 작업: 사용자 샘플 프로젝트 테스트 지원(메뉴얼 3단계 — 준비 완료) 또는 `NEXT.md` 구현 후보 3(Brownfield discovery). push 승인 대기 중(총 17커밋)
 
 ## 스프린트 카드 (wave 002)
 
@@ -96,6 +96,14 @@
 - 2차 재검토 접수: 런 `dwfrun-12ca5a04`(NEW-1 해소·R2 원 요구 유지·회귀·기록 일치를 검증자 2명이 판정, `GLM-5.3-Flash$high`, 초안 `.zcode/workflow-drafts/wave-002-잔여지적-재검토2-커밋-71f085d.dwf.ts`). 판정 수신 시 이 항목에 결과를 덧붙인다
 - 유지보수: 없음. 커밋: fix(NEW-1) + 기록(보고·CHANGELOG·NEXT·이 항목) — 전부 미푸시
 - 블로커: 없음. 다음 실행의 첫 작업: 2차 재검토 판정 수신 → APPROVE면 wave 002 완전 종결, FAIL이면 지적 반영
+
+#### 2026-10-11 — 2차 재검토 판정 수신·RECORDS 종결 (wave 002 잔여 지적 흡수 완결)
+
+- 최종 갱신: 2026-10-11 02:1X KST / 상태: 완료·종결
+- 2차 재검토 판정: 런 `dwfrun-12ca5a04` — **수정 검증 CLEAR(4/4 RESOLVED)·규칙 무결성 CLEAR(3/4)**, 규칙 약화 없음, 새 CRITICAL/HIGH 0건, 결정론적 게이트 통과(self-test 47건·자기 적용 exit 0). NEW-1 해소·R2 원 요구 유지·회귀 없음을 양쪽 검증자가 확인. 판정식은 미해소 1건(RECORDS·PARTIAL)으로 FAIL을 출력했다 — 코드 결함이 아니라 검증자 세션이 런 아카이브에 접근 불가해 감사 보고 ↔ 1차 런 반환값의 직접 대조를 못 한 것. 전문은 `docs/audits/wave002-residual-reverify2-2026-10-11.md`
+- RECORDS 종결: 검증자가 제시한 방법("런 아카이브에 접근 가능한 세션에서 대조")대로 메인 세션이 1차 런 `dwfrun-76f40125` 반환값과 감사 보고를 항목별 대조 — 종합 FAIL·미해소 0건·약화 없음·15/15 RESOLVED·self-test 44건·NEW-1 재현 상세 **전부 일치**. 1차 보고에 부록으로 기록
+- 종결 근거: ① 검증자 2명 CLEAR ② 규칙 약화 0건·새 CRITICAL/HIGH 0건 ③ 유일 PARTIAL(RECORDS)을 검증자 지정 방법으로 닫음. 사용자가 이 판단에 이의를 제기하면 재검토를 다시 접수할 수 있다
+- 유지보수: 없음. 커밋: 종결 기록 1건 — 미푸시. 이후의 첫 작업: 사용자 샘플 테스트 지원 또는 구현 후보 3
 
 ### wave 001 — audit-001 2차 지적 반영분 재검증 (2026-10-09, 완료)
 
