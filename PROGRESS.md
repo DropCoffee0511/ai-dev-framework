@@ -53,10 +53,11 @@
 - 웨이브 7 세션 자신의 중복 런 `dwfrun-500dee96`은 판정 확보 후 토큰 0인 채 중단했다(자기 런이라 승인 불필요, 슬롯 양보)
 - 지적 수정(스크립트와 기록 문서만 — 규칙 문서 순증가 0줄): HIGH 2건(AC 빈 TC 목록·필수 권한 테스트 빈 TC → Tests MISSING / 실행 증거 §4 필수 칸 미채움 PASS는 증거 아님), MEDIUM 3건(§5.2 3행 Gate 판정자 빈 칸 무효·보고 표시 / self-test 사례 보강 / Review에서 값 false 우선 평가), LOW 4건(docstring·CHANGELOG 주장 정정 / screen_api SCR-/API- 외 ID 위반 / code 저장소 밖 경로 위반 / 초과 REQ 위반→비고 완화). LOW 8(작성자 판별)은 §5.4 고지 한계라 미수정 — 1차 검토도 같은 판정
 - 재검증: `--self-test` 27건 전부 통과(종료 0, 21건→27건), 자기 저장소 적용 위반 0건(종료 0), 게이트 1·2 전체 스캔 통과, 게이트 3(변경 문서 §-참조 ↔ convention 실제 섹션 `## 1`~`## 7`, `### 5.1`~`### 5.4`) 통과, 게이트 4 CHANGELOG [Unreleased] 갱신. 조건부 게이트: ① workflows 미건드림 ② README 상태·한계 — 이번 변경으로 무관 ③ gates.md 판정 추가 없음
+- 추가 접수(2번째 완료 중복 런 `dwfrun-4505d5b5`의 신규 지적 2건 — 판정 자체는 구 커밋 대상 중복이지만 지적은 유효): ① ADOPTING.md §1 복사 허용 목록에 `scripts/` 분류 누락(medium — wave 002 후속 1줄 수정 후보, 규칙 순증가를 수반하므로 근거와 함께 기록 필요) ② audit-002 L-1(not_applicable 사용 시 등록 PERM/ERR가 있어도 PASS 가능) 트랩이 self-test에 미시험(medium — L-1은 NEXT.md 미수정·사용자 승인 대상 항목이라 자율 착수하지 않는다)
 - 유지보수: 없음 (과제 작업만 수행)
 - 커밋: 검토 보고·스크립트 수정 fix 커밋 + progress 기록 커밋 (브랜치 `feature/traceability-script`, 미푸시 — push는 사용자 승인 대상)
 - 블로커: 없음. 다음 시도 조건: 재검토 판정 수신
-- 다음 실행의 첫 작업: 재검토 런(수정 커밋 대상) 판정 수신 → APPROVE면 wave 002 완료 기록·AC-5 ✅, FAIL이면 지적 반영 → 규칙 약화 여부도 다시 확인
+- 다음 실행의 첫 작업: 재검토 런 `dwfrun-edf17f7f-343f-4929-bb58-37b9c91d2b07`(수정 커밋 `fbfeaa4` 대상) 판정 수신 → APPROVE면 wave 002 완료 기록·AC-5 ✅·추가 접수 2건 처리 판단, FAIL이면 지적 반영 → 규칙 약화 여부도 다시 확인
 
 ### wave 001 — audit-001 2차 지적 반영분 재검증 (2026-10-09, 완료)
 
