@@ -24,7 +24,7 @@ v0.1 부트스트랩 이후 작업. 우선순위는 `MASTER_PROMPT.md` §20을 �
 ## 구현 후보 (우선순위 순)
 
 1. **Gate 자동 강제** — 현재는 에이전트가 규칙을 따르는 방식 (`docs/discovery.md` R3). 도구별 방식 조사 필요
-2. **Traceability 검사 스크립트** — **구현 완료·독립 검토 진행 (2026-10-09)**: `scripts/check_traceability.py`. `docs/traceability-convention.md` §3–§5를 자동 계산한다(입력 Markdown/YAML). 단일 파일·외부 의존성 없음 원칙 준수, `--self-test` 21건 통과, 자기 저장소 적용(`docs/gates.md` 판독) 위반 0건. 독립 검토 판정까지가 완료다 (`PROGRESS.md` wave 002)
+2. **Traceability 검사 스크립트** — **구현 완료·1차 검토 FAIL 지적 수정, 재검토 대기 (2026-10-10)**: `scripts/check_traceability.py`. `docs/traceability-convention.md` §3–§5를 자동 계산한다(입력 Markdown/YAML). 단일 파일·외부 의존성 없음 원칙 준수. 1차 독립 검토(`docs/audits/wave002-review-2026-10-10.md`, 런 `dwfrun-3d1d3dfe`)는 규칙 무결성 APPROVE·계산 격차 FAIL(HIGH 2건 포함 13지적)이었고 HIGH·MEDIUM과 근거 있는 LOW를 수정했다 — `--self-test` 27건 통과, 자기 저장소 적용(`docs/gates.md` 판독) 위반 0건. 재검토 판정까지가 완료다 (`PROGRESS.md` wave 002)
 3. **Brownfield discovery 절차 구체화** (`workflows/discover/`) 와 `/project-discover` 동작 정의
 4. **Phase 5 Self Test** — 작은 샘플 프로젝트로 Greenfield/Brownfield 흐름, 누락 requirement·permission·test 탐지, 독립 리뷰, provenance 흐름 검증
 5. `agents/` 역할 문서 (analyst, architect, developer, tester, security-reviewer, independent-reviewer) — 현재는 `MASTER_PROMPT.md` §13이 정의

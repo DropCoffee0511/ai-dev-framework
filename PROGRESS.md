@@ -6,15 +6,12 @@
 
 ## 최근 요약 (wave 002)
 
-- 최종 갱신: 2026-10-09 20:52 KST
+- 최종 갱신: 2026-10-10 10:27 KST (웨이브 7 세션)
 - 이번 과제: `NEXT.md` 구현 후보 2 — Traceability 검사 스크립트
-- 상태: **구현 완료·독립 검토 대기** — 커밋 `3477dd6`(브랜치 `feature/traceability-script`), dynamic-workflow 리뷰 run `dwfrun-b216d5a7` 진행 중
-- 변경한 문서: `scripts/check_traceability.py`(신규), `docs/traceability-convention.md`(도입 안내 1문장), `CHANGELOG.md`, `NEXT.md`, `README.md`, `AGENTS.md`, 이 파일. **규칙 순증가 2줄** (convention 안내 문장 + README 구조 목록 1줄 — 스프린트 카드 목표 ≤3줄 이내, 규칙 본문 변경 0)
-- 4종 문서 게이트: 전부 통과(20:40경). 게이트 1·2 전체 스캔 위반 0건, 게이트 3 변경 6문서 §-참조 ↔ MASTER_PROMPT·convention 실제 섹션 대조 일치, 게이트 4 CHANGELOG [Unreleased] 갱신 확인. 조건부 게이트: ① workflows 미건드림(미해당) ② README 상태·한계 갱신 후 현실과 일치 ③ gates.md 판정 추가 없음(미해당)
-- 스크립트 검증: `--self-test` 21건 전부 통과(종료 코드 0), 자기 저장소 적용 종료 코드 0 — `docs/gates.md`에서 `B_FINAL = false`(근거 커밋 bfbe160, 대리 기록 줄)를 판독하고 이력 구역 14줄을 현재 값에서 제외, 구조 위반 0건
-- 독립 검토: dynamic-workflow(§7 기본 경로) 1-페이즈 — 결정적 게이트(`world.run`으로 self-test·자기 적용 재실행) + 읽기 전용 리뷰어 2명 병렬(규약 충실도 / 문서 일치, `GLM-5.3-Flash$high`, `git show 3477dd6` 커밋-핀 판독). claude/codex CLI는 미사용(dynamic-workflow가 기본 경로이며 평일 08:00–18:00 호출 금지 조항 유지)
-- 커밋: `3477dd6` feat(traceability) — 미푸시. 웨이브 001 브랜치(`feature/audit-001-reverify`)의 미푸시 2커밋과 합쳐 저장소 전체 미푸시 3커밋 (push는 사용자 승인 대상)
-- 다음 실행의 첫 작업: `dwfrun-b216d5a7` 판정 수신 → 지적 반영(REQUEST_CHANGES면 수정 후 재검토) → 본 기록 상태를 완료로 갱신. 검토 큐 대기는 wave 001 실측상 수 시간이 걸릴 수 있다(대기는 작업 시간이 아니다)
+- 상태: **재검토 대기** — 1차 독립 검토 **FAIL**(계산 격차 HIGH 2건 포함 13지적, 규칙 약화 0건)을 수신해 HIGH·MEDIUM과 근거 있는 LOW를 수정했다(규칙 문서 순증가 0줄). `--self-test` 27건 통과, 자기 저장소 적용 위반 0건, 4종 게이트 통과. 재검토 런 판정 수신이 남았다
+- 1차 판정: 6건 중복 런 중 첫 완료 런 `dwfrun-3d1d3dfe`(10:04:39 KST 완료) — 규약 일치 FAIL / 규칙 무결성 APPROVE. 전문 `docs/audits/wave002-review-2026-10-10.md`. 웨이브 002 세션의 `dwfrun-b216d5a7` 등 나머지 5런은 중복으로 기록(다른 세션 소유라 취소는 사용자 승인 대상)
+- 수정 내용: 빈 AC 목록·빈 필수 권한 테스트 TC → Tests MISSING(HIGH), 실행 증거 §4 필수 칸 미채움 PASS는 증거 아님(HIGH), §5.2 3행 Gate 판정자 빈 칸 무효 + 보고 표시(MEDIUM), Review에서 값 false 우선 평가(MEDIUM), self-test 사례 보강(21→27건)(MEDIUM), screen_api 스키마·code 상대경로 위반화·초과 REQ 비고 완화·주장 문구 정정(LOW). LOW 8(작성자 판별)은 §5.4 고지 한계라 미수정
+- 다음 실행의 첫 작업: 재검토 런(수정 커밋 대상, `PROGRESS.md` 웨이브 기록의 런 ID 참조) 판정 수신 → APPROVE면 wave 002 완료 기록, FAIL이면 지적 반영 재검토
 
 ## 스프린트 카드 (wave 002)
 
@@ -26,15 +23,15 @@
 - 불변식 영향(`AUTOPILOT.md` §2): 규칙 단일 출처 유지(스크립트가 규칙을 새로 정의하지 않고 convention §3–§5를 계산 — docstring에 명시), 최소 증가(실제 2줄), 템플릿·자기 기록 분리(`scripts/`는 양쪽 아님), 버전·이력 일치(CHANGELOG·README·AGENTS 갱신), 추적 가능성(`NEXT.md` 구현 후보 2와 연결)
 - 수용 조건:
   1. 스크립트는 python3 표준 라이브러리만 쓰는 단일 파일이다 (외부 의존성·manifest 0) — ✅ import는 argparse·os·re·subprocess·sys·tempfile뿐
-  2. `--self-test`가 §3 차원 판정(PASS/PARTIAL/MISSING)·§4 상태 계산(DONE/IN PROGRESS/NOT READY)·§5 기록 유효성(5칸, 값, 판정자 유형, 맨 아래 줄, 이력 구역 무시, STALE) 사례를 전부 통과한다 — ✅ 21건 전부 PASS(종료 코드 0)
-  3. 자기 저장소 적용: 저장소 루트에서 실행해 `docs/gates.md` 기록 표를 판독하고(B_FINAL=false 유효 줄, 이력 구역 무시) 구조 위반 0건으로 종료한다 — ✅ B_FINAL=false 판독, 이력 14줄 제외, 위반 0건(종료 코드 0)
-  4. 4종 문서 게이트 통과, `CHANGELOG.md`·`NEXT.md` 기록 갱신 후 작업 브랜치 커밋 (push는 승인 대상) — ✅ 커밋 `3477dd6`
-  5. dynamic-workflow 독립 리뷰를 받는다 (지연 시 검토 대기 등재와 경로·상태 기록까지) — ⏳ run `dwfrun-b216d5a7` 진행 중
+  2. `--self-test`가 §3 차원 판정(PASS/PARTIAL/MISSING)·§4 상태 계산(DONE/IN PROGRESS/NOT READY)·§5 기록 유효성(5칸, 값, 판정자 유형, 맨 아래 줄, 이력 구역 무시, STALE) 사례를 전부 통과한다 — ✅ 통과(종료 코드 0). 1차 검토가 "5칸·값·맨 아래 줄 사례 부재"를 지적해 보강했다(27건)
+  3. 자기 저장소 적용: 저장소 루트에서 실행해 `docs/gates.md` 기록 표를 판독하고(B_FINAL=false 유효 줄, 이력 구역 무시) 구조 위반 0건으로 종료한다 — ✅ B_FINAL=false 판독, 이력 14줄 제외, 위반 0건(종료 코드 0). 1차 검토 수정 후 재확인
+  4. 4종 문서 게이트 통과, `CHANGELOG.md`·`NEXT.md` 기록 갱신 후 작업 브랜치 커밋 (push는 승인 대상) — ✅ 커밋 `3477dd6` + 검토 반영 커밋
+  5. dynamic-workflow 독립 리뷰를 받는다 (지연 시 검토 대기 등재와 경로·상태 기록까지) — ⏳ 1차 판정 수신: **FAIL**(계산 격차 HIGH 2건) → 지적 수정 완료 → 재검토 대기
 - 확인 수단: `--self-test` + 자기 저장소 실행 출력 + 4종 문서 게이트(`AUTOPILOT.md` §3.1) + dynamic-workflow 독립 리뷰어
 
 ## 웨이브 기록
 
-### wave 002 — 구현 후보 2: Traceability 검사 스크립트 (2026-10-09, 구현 완료·검토 대기)
+### wave 002 — 구현 후보 2: Traceability 검사 스크립트 (2026-10-09~10, 1차 검토 FAIL → 지적 수정·재검토 대기)
 
 - 최종 갱신: 2026-10-09 20:52 KST / 과제: `NEXT.md` 구현 후보 2 / 상태: 구현 완료·독립 검토 대기(커밋 `3477dd6`, 미푸시)
 - 변경한 문서: 위 요약 참조. 규칙 순증가 2줄(카드 목표 ≤3줄 이내)
@@ -48,6 +45,18 @@
 - 유지보수: 없음 (과제 작업만 수행)
 - 블로커: 없음. 다음 시도 조건: 리뷰 판정 수신
 - 다음 실행의 첫 작업: 판정 수신 → 지적 반영 → 상태 갱신(완료). REQUEST_CHANGES면 수정 후 규약 대조 재검토
+
+#### 2026-10-10 (웨이브 7 세션) — 1차 판정 수신·지적 수정
+
+- 최종 갱신: 2026-10-10 10:27 KST / 상태: 지적 수정 완료·재검토 대기
+- 1차 독립 검토: 6건 중복 런 중 **첫 완료 런 `dwfrun-3d1d3dfe`**(09:00:46 KST 디스패치, 10:04:39 KST 완료, 1,000,625 토큰)의 판정을 채택 — 종합 **FAIL**(규약 일치 FAIL / 규칙 무결성 APPROVE, 규칙 약화 0건). HIGH 2건(빈 AC 목록·증거 필드 미채움 PASS가 거짓 DONE 경로), MEDIUM 4건, LOW 7건, 전부 verified. 전문은 `docs/audits/wave002-review-2026-10-10.md`. `dwfrun-b216d5a7` 등 나머지 5런은 중복 판정으로 기록만 남긴다(다른 세션 소유 산출물이라 취소는 사용자 승인 대상)
+- 웨이브 7 세션 자신의 중복 런 `dwfrun-500dee96`은 판정 확보 후 토큰 0인 채 중단했다(자기 런이라 승인 불필요, 슬롯 양보)
+- 지적 수정(스크립트와 기록 문서만 — 규칙 문서 순증가 0줄): HIGH 2건(AC 빈 TC 목록·필수 권한 테스트 빈 TC → Tests MISSING / 실행 증거 §4 필수 칸 미채움 PASS는 증거 아님), MEDIUM 3건(§5.2 3행 Gate 판정자 빈 칸 무효·보고 표시 / self-test 사례 보강 / Review에서 값 false 우선 평가), LOW 4건(docstring·CHANGELOG 주장 정정 / screen_api SCR-/API- 외 ID 위반 / code 저장소 밖 경로 위반 / 초과 REQ 위반→비고 완화). LOW 8(작성자 판별)은 §5.4 고지 한계라 미수정 — 1차 검토도 같은 판정
+- 재검증: `--self-test` 27건 전부 통과(종료 0, 21건→27건), 자기 저장소 적용 위반 0건(종료 0), 게이트 1·2 전체 스캔 통과, 게이트 3(변경 문서 §-참조 ↔ convention 실제 섹션 `## 1`~`## 7`, `### 5.1`~`### 5.4`) 통과, 게이트 4 CHANGELOG [Unreleased] 갱신. 조건부 게이트: ① workflows 미건드림 ② README 상태·한계 — 이번 변경으로 무관 ③ gates.md 판정 추가 없음
+- 유지보수: 없음 (과제 작업만 수행)
+- 커밋: 검토 보고·스크립트 수정 fix 커밋 + progress 기록 커밋 (브랜치 `feature/traceability-script`, 미푸시 — push는 사용자 승인 대상)
+- 블로커: 없음. 다음 시도 조건: 재검토 판정 수신
+- 다음 실행의 첫 작업: 재검토 런(수정 커밋 대상) 판정 수신 → APPROVE면 wave 002 완료 기록·AC-5 ✅, FAIL이면 지적 반영 → 규칙 약화 여부도 다시 확인
 
 ### wave 001 — audit-001 2차 지적 반영분 재검증 (2026-10-09, 완료)
 
