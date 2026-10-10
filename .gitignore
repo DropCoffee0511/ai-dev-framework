@@ -1,6 +1,9 @@
 # AI tool local state
 .omc/
 .claude/settings.local.json
+# autopilot 루프의 로컬 상태 (커밋 대상이 아니다 — R8)
+.autopilot.lock
+.autopilot-skip.log
 
 # Secrets and credentials (never commit)
 .env

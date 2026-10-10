@@ -2,7 +2,7 @@
 
 AI 코딩 도구(Claude Code, Codex CLI 등)로 개발할 때 **요구사항·업무흐름·데이터·권한·예외·테스트·완료조건을 먼저 명확히 하고, 명세에 맞는 최소 변경만 구현한 뒤 독립 리뷰까지 통과**하도록 만드는 운영 프레임워크.
 
-> 상태: **v0.1 초안 (문서 전용, 검증 진행 중)**. 소스코드·CLI는 아직 없다. Traceability 검사 스크립트 1개가 있다(`scripts/check_traceability.py`, python3 표준 라이브러리만 사용). 독립 감사 2건(`docs/audits/audit-001.md`, `docs/audits/audit-002.md`)이 모두 `B_FINAL = FAIL`이었고, 지적의 일부를 고친 상태다. 현재 Gate 값은 `docs/gates.md`, 남은 작업은 `NEXT.md`에 있다. 프로젝트 이름은 작업명이며 확정되지 않았다 (`docs/discovery.md` A1).
+> 상태: **v0.1 초안 (검증 진행 중)**. 실행 코드는 Traceability 검사 스크립트 1개뿐이다 (`scripts/check_traceability.py`, python3 표준 라이브러리만 사용, git 필요). CLI는 아직 없다. 독립 감사 2건(`docs/audits/audit-001.md`, `docs/audits/audit-002.md`)이 모두 `B_FINAL = FAIL`이었고, 지적의 일부를 고친 상태다. 현재 Gate 값은 `docs/gates.md`, 남은 작업은 `NEXT.md`에 있다. 프로젝트 이름은 작업명이며 확정되지 않았다 (`docs/discovery.md` A1). 처음 읽는 사용자는 `사용자사용메뉴얼.md`(튜토리얼)부터 보면 된다.
 
 ## 해결하려는 문제
 
@@ -19,7 +19,7 @@ docs/                   01~10 문서 템플릿(대상 프로젝트용), traceabi
                         그리고 이 저장소 자체의 기록: discovery.md, gates.md, audits/ (ADOPTING.md §1)
 specs/                  변경 단위 명세 (specs/README.md)
 workflows/              11단계 개발 흐름의 입력·산출물·Gate
-scripts/                traceability 검사 스크립트 (`docs/traceability-convention.md` §3–§5 계산)
+scripts/                traceability 검사 스크립트 (`docs/traceability-convention.md` §3–§5 계산. python3 + git 필요)
 adapters/               Claude Code / Codex CLI 진입 전략
 CLAUDE.md, AGENTS.md    도구별 얇은 진입 파일 (규칙은 MASTER_PROMPT.md를 가리킴)
 LICENSE                 MIT
@@ -31,10 +31,11 @@ CHANGELOG.md            변경 이력
 
 ## 사용 방법 (v0.1)
 
-1. **다른 프로젝트에 적용하려면 `ADOPTING.md`를 먼저 읽는다.** 이 저장소를 그대로 앱 저장소로 쓰지 않는다 (이 저장소 자체의 기록이 섞여 있다).
-2. 이 저장소 자체를 작업할 때는 AI 에이전트를 이 저장소 루트에서 실행하고, `MASTER_PROMPT.md`를 읽고 따르라고 지시한다 (`CLAUDE.md`/`AGENTS.md`가 자동으로 안내한다).
-3. 개발 흐름은 `discover → specify → clarify → design → plan → review-plan → implement → verify → review-implementation → red-team → converge` 순서이며, 각 단계의 Gate를 통과해야 다음으로 넘어간다 (`workflows/README.md`).
-4. 기능은 `docs/traceability-convention.md`의 규칙으로 요구사항부터 코드·테스트까지 연결되어야 완료로 본다.
+1. 처음 사용자라면 `사용자사용메뉴얼.md`(튜토리얼)부터 따라 한다. 검사 스크립트 실행에는 `python3`와 `git`이 필요하다.
+2. **다른 프로젝트에 적용하려면 `ADOPTING.md`를 먼저 읽는다.** 이 저장소를 그대로 앱 저장소로 쓰지 않는다 (이 저장소 자체의 기록이 섞여 있다).
+3. 이 저장소 자체를 작업할 때는 AI 에이전트를 이 저장소 루트에서 실행하고, `MASTER_PROMPT.md`를 읽고 따르라고 지시한다 (`CLAUDE.md`/`AGENTS.md`가 자동으로 안내한다).
+4. 개발 흐름은 `discover → specify → clarify → design → plan → review-plan → implement → verify → review-implementation → red-team → converge` 순서이며, 각 단계의 Gate를 통과해야 다음으로 넘어간다 (`workflows/README.md`).
+5. 기능은 `docs/traceability-convention.md`의 규칙으로 요구사항부터 코드·테스트까지 연결되어야 완료로 본다.
 
 ## 현재 한계
 

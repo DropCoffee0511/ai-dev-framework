@@ -6,7 +6,7 @@
 
 | 구분 | 파일 |
 |---|---|
-| 복사함 | `MASTER_PROMPT.md`, `constitution/principles.md`, `workflows/` 전체, `docs/01_product.md`~`docs/10_release_checklist.md`, `docs/traceability-convention.md`, `specs/README.md`, `adapters/README.md`와 쓰는 도구의 `adapters/<도구>/README.md` |
+| 복사함 | `MASTER_PROMPT.md`, `constitution/principles.md`, `workflows/` 전체, `docs/01_product.md`~`docs/10_release_checklist.md`, `docs/traceability-convention.md`, `specs/README.md`, `scripts/check_traceability.py`, `adapters/README.md`와 쓰는 도구의 `adapters/<도구>/README.md` |
 | 대상이 자기 것으로 만듦 | `docs/discovery.md` (discover 단계 산출물), `docs/gates.md` (첫 Gate를 기록할 때 만든다. 형식은 `docs/traceability-convention.md` §5.1. 없으면 모든 Gate는 `UNKNOWN`), `NEXT.md`, `THIRD_PARTY_NOTICES.md`, `CHANGELOG.md`. `NEXT.md`·`THIRD_PARTY_NOTICES.md`·`CHANGELOG.md`가 이미 있으면 새로 만들지 않고 기존 파일에 이어서 쓴다 (같은 용도일 때만. §4의 3번) |
 | 가져가지 않음 | `ADOPTING.md`, `BOOTSTRAP.md`, `README.md`, `LICENSE`, `REFERENCES.md`, `CLAUDE.md`, `AGENTS.md`, `docs/audits/`, 이 저장소의 `docs/discovery.md`·`docs/gates.md`·`NEXT.md`·`CHANGELOG.md`·`THIRD_PARTY_NOTICES.md`, `261002 대화내용.txt`, `.gitignore` |
 

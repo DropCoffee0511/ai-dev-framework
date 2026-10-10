@@ -25,6 +25,11 @@ v0 한계 (convention §5.4·§6의 수동 절차를 대체하지 않는다):
   (Gate 재판정 §5.3 확인은 Review 차원 계산에서만 수행한다.)
 - 실행 증거는 §4가 요구하는 칸(실행 일시·명령·커밋·증거 경로)의 존재만 확인한다.
   칸 내용의 진위(위조)는 검사하지 않는다.
+- REQ 상세 블록이 없으면 등록된 AC 전체 집합을 알 수 없다. 이 경우 Requirement는
+  PASS로 두고 비고로 남긴다. PARTIAL이 보수적이라는 상반 의견이 있어 방향 확정은
+  사용자 결정으로 남긴다 (R4).
+- TASK 완료는 표기 휴리스틱([x]/DONE/✅)으로 판단하며 비고로 고지한다 (R3).
+- Gate 기록 근거 칸의 커밋 해시 부재는 위반이 아니라 비고로 보고한다 (§5.1, R5).
 - yaml 파서는 convention §2의 제한된 형식(list·중첩 acceptance·not_applicable 사전)만
   이해한다. 문자열 값은 큰따옴표 또는 무따옴표, 주석은 행 단위(# 시작)만 지원한다.
 """
@@ -103,6 +108,7 @@ class Registry:
         self.tc_result = {}       # tc -> 케이스 목록의 결과 칸 값
         self.tc_targets = {}      # tc -> 대상 칸의 ID 집합
         self.tc_code = {}         # tc -> 테스트 코드 위치 칸
+        self.tc_target_col = 2    # 케이스 목록 표의 대상(AC/ERR/PERM) 칸 위치 (R2)
         self.tc_evidence = set()  # 실행 증거 표에 PASS 줄이 있는 TC
         self.missing_docs = []
 
@@ -208,10 +214,17 @@ def _parse_test_cases(root, reg):
         if not cells or not cells[0]:
             continue
         reg.ids['TC'] |= find_ids(line, {'TC'})
-        if re.search(r'케이스 목록', section) and re.fullmatch(ID_RE, cells[0]):
-            reg.tc_result[cells[0]] = cells[-1].upper()
-            reg.tc_targets[cells[0]] = find_ids(line, {'AC', 'ERR', 'PERM'})
-            reg.tc_code[cells[0]] = cells[5] if len(cells) > 5 else ''
+        if re.search(r'케이스 목록', section):
+            if cells[0] == 'ID' or any('대상' in c for c in cells):
+                # 헤더 행 — 대상(AC/ERR/PERM) 칸의 위치를 찾는다 (R2: 그 칸만 읽는다)
+                reg.tc_target_col = next((i for i, c in enumerate(cells)
+                                          if '대상' in c), 2)
+            elif re.fullmatch(ID_RE, cells[0]):
+                reg.tc_result[cells[0]] = cells[-1].upper()
+                tgt = cells[reg.tc_target_col] \
+                    if len(cells) > reg.tc_target_col else ''
+                reg.tc_targets[cells[0]] = find_ids(tgt, {'AC', 'ERR', 'PERM'})
+                reg.tc_code[cells[0]] = cells[5] if len(cells) > 5 else ''
         elif re.search(r'실행 증거', section) and len(cells) >= 6 \
                 and re.fullmatch(ID_RE, cells[0]) and cells[1].upper() == 'PASS' \
                 and all(cells[2:6]):
@@ -356,7 +369,9 @@ def parse_gates(text):
                   if (c := split_row(l)) is not None and c[0] != '일시')
     rec = [n for n, t in heads if t == '기록']
     if not rec:
-        return None, [], ignored
+        # N1: `## 기록` 절이 없는 것은 새 프로젝트·새 change의 정상 상태다.
+        # None 대신 빈 목록을 돌려 전 Gate UNKNOWN(§5.1)으로 계산하게 한다.
+        return [], [], ignored
     start = rec[-1]
     rows = []
     for n in range(start + 1, section_end(start)):
@@ -421,14 +436,18 @@ def changed_since(root, commit, files):
 
 
 def plan_files(root, change):
-    """plan.md의 "변경할 파일" 후보(존재하는 repo 상대 경로)를 수집한다 (§5.3)."""
+    """plan.md의 "변경할 파일" 후보(존재하는 repo 상대 경로)를 수집한다 (§5.3).
+
+    슬래시 없는 파일명(NOTICE 등)도 대상에 포함한다 (R1). 후보는 존재하는
+    파일로 한정하므로 일반 단어가 후보가 되어도 걸러진다.
+    """
     if not change:
         return []
     text = read_text(root, os.path.join('specs', change, 'plan.md'))
     if not text:
         return []
     out = []
-    for m in re.finditer(r'[\w.-]+(?:/[\w.-]+)+', text):
+    for m in re.finditer(r'[\w.-]+(?:/[\w.-]+)*', text):
         p = m.group(0)
         if os.path.isfile(os.path.join(root, p)) and p not in out:
             out.append(p)
@@ -455,6 +474,11 @@ class Analyzer:
         m = re.match(r'specs/([^/]+)/', rel)
         if m:
             change = m.group(1)
+            if read_text(self.root,
+                         os.path.join('specs', change, 'spec.md')) is None:
+                # N3: 생략을 조용히 하지 않고 비고로 남긴다.
+                self.extras.append((rel, 'spec.md가 없어 범위(REQ 목록) 검사를 '
+                                    '생략한다 (§2)'))
         entries, problems = parse_traceability(text)
         for p in problems:
             self.violation(rel, p)
@@ -484,6 +508,32 @@ class Analyzer:
             return None
         return find_ids(text, {'REQ'})
 
+    def reqs_without_traceability(self, reqs, rel):
+        """N2: spec.md가 REQ를 선언하는데 traceability.md 파일 자체가 없는 경우 (§2)."""
+        for r in reqs:
+            dims = {d: ('MISSING', 'traceability.md 파일이 없다 (§2 범위)')
+                    for d in DIM_ORDER}
+            self.reqs.append((rel, r, dims, 'NOT READY',
+                              ['spec.md가 REQ를 선언하지만 traceability.md '
+                               '파일이 없다 (위반이 아니라 NOT READY 상태다)']))
+
+    def cross_check_tc_complete(self):
+        """TRACEABILITY_COMPLETE=true 기록과 계산된 REQ 상태의 교차 확인(비고 경로).
+
+        계산기가 Gate 값을 판정하는 것이 아니라, 기록과 계산 결과의 모순만
+        비고로 알린다 (§5.1 — 런 `5ecaf5b2` 지적의 비고 경로 처리).
+        """
+        for info in self.gates_seen.values():
+            row = gate_current(info['rows'], 'TRACEABILITY_COMPLETE')
+            if row is None or row.value != 'TRUE':
+                continue
+            not_done = sorted({r for _, r, _, s, _ in self.reqs if s != 'DONE'})
+            if not_done:
+                self.extras.append(
+                    (info['rel'],
+                     'TRACEABILITY_COMPLETE=true 기록이 있으나 DONE이 아닌 '
+                     'REQ가 있다 (§5) — 수동 확인: %s' % ', '.join(not_done)))
+
     def _load_gates(self, rel, project):
         text = read_text(self.root, rel)
         key = 'project' if project else rel
@@ -498,6 +548,12 @@ class Analyzer:
                     for p in row.problems:
                         self.violation(rel, '기록 줄: %s — %s'
                                        % (' | '.join(row.cells), p))
+                elif row.gate not in USER_ONLY_GATES and row.commit is None:
+                    # R5: §5.1은 근거 칸에 커밋 해시를 요구한다. USER 승인 Gate의
+                    # 근거는 메시지 인용이므로 제외하고, 나머지는 비고로 알린다.
+                    self.extras.append((rel, '기록 근거에 커밋 해시가 없다 '
+                                        '(§5.1) — 수동 확인: %s %s'
+                                        % (row.cells[0], row.gate)))
         self.gates_seen[key] = info
         return info
 
@@ -691,6 +747,8 @@ class Analyzer:
             if tmap is None:
                 dims['Implementation'] = ('PARTIAL', 'tasks.md가 없어 완료 확인 불가')
             else:
+                notes.append('TASK 완료는 표기 휴리스틱([x]/DONE/✅) 판정이다 — '
+                             'tasks.md 원문 확인 권장 (R3)')
                 undone = [t for t in tasks if not tmap.get(t)]
                 if undone:
                     dims['Implementation'] = ('PARTIAL', '미완료 TASK: %s'
@@ -751,7 +809,9 @@ class Analyzer:
         out = {}
         for line in text.splitlines():
             for tid in find_ids(line, {'TASK'}):
-                out[tid] = bool(re.search(r'\b(DONE|완료)\b|\[x\]|✅', line,
+                # R3: "완료 후 재검토 필요" 같은 문구를 완료로 오판하지 않게
+                # 표기 휴리스틱을 [x]/DONE/✅로 축소한다. 판단 방식은 비고로 고지한다.
+                out[tid] = bool(re.search(r'\[x\]|\bDONE\b|✅', line,
                                           re.IGNORECASE))
         return out
 
@@ -765,8 +825,21 @@ def analyze(root):
         files.append('docs/traceability.md')
     for rel in files:
         a.analyze_traceability(rel)
+    for spec in _specs_files(root, 'spec.md'):
+        m = re.match(r'specs/([^/]+)/', spec)
+        if not m:
+            continue
+        tr = os.path.join('specs', m.group(1), 'traceability.md')
+        if tr in files:
+            continue
+        text = read_text(root, spec) or ''
+        reqs = sorted(find_ids(text, {'REQ'}))
+        if reqs:
+            # N2: 파일이 없어도 spec이 선언한 REQ는 계산 대상이다 (§2).
+            a.reqs_without_traceability(reqs, tr)
     if not any(k == 'project' for k in a.gates_seen):
         a._load_gates('docs/gates.md', project=True)
+    a.cross_check_tc_complete()
     return a
 
 
@@ -777,6 +850,11 @@ def report(a):
         if info['missing']:
             out.append('  파일 없음 — Gate 값은 UNKNOWN이다 (§5.1)')
             continue
+        if not any(row.valid for row in info['rows']):
+            # N1: 기록 절이 없거나 유효 줄이 없는 것은 새 프로젝트의 정상 상태다.
+            out.append('  `## 기록` 유효 줄이 없다 — Gate 값은 전부 UNKNOWN이다 '
+                       '(§5.1). 새 프로젝트·새 change의 정상 상태다 '
+                       '(구조 위반이 아니다)')
         if info['ignored']:
             out.append('  이력 구역 줄 %d개는 현재 값 계산에서 제외 (§5.1)'
                        % info['ignored'])
@@ -916,13 +994,104 @@ def self_test():
         check('무효 줄은 무시되고 유효 줄이 현재 값 — REQ-001 DONE 유지',
               status == 'DONE' and dims.get('Review') == 'PASS', str(dims))
 
+    # 사례 6: gates.md에 `## 기록` 절이 없어도 크래시하지 않고 UNKNOWN으로 계산 (N1)
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, no_records=True)
+        err = None
+        try:
+            a = analyze(tmp)
+        except Exception as exc:  # N1 회귀(TypeError 크래시)는 여기서 잡힌다
+            err = exc
+        check('N1: `## 기록` 절 부재 시 크래시 없음', err is None, str(err))
+        if err is None:
+            status, dims = dims_of(a, 'REQ-001')
+            check('N1: 기록 없음 → Review PARTIAL(UNKNOWN), 거짓 DONE 아님',
+                  dims.get('Review') == 'PARTIAL' and status == 'IN PROGRESS',
+                  str((status, dims)))
+            check('N1: 파일이 있어도 기록 절이 없으면 구조 위반이 아니다',
+                  not a.violations, str(a.violations))
+            check('N1: 보고에 기록 절 없음 안내가 있다',
+                  '유효 줄이 없다' in report(a))
+
+    # 사례 7: plan의 슬래시 없는 파일명도 §5.3 재판정 대상이다 (R1)
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, plan_bare=True)
+        a = analyze(tmp)
+        check('R1: plan_files가 NOTICE를 대상에 포함',
+              'NOTICE' in plan_files(a.root, '001-demo'),
+              str(plan_files(a.root, '001-demo')))
+        raw = next((dims for _, r, dims, _, _ in a.reqs if r == 'REQ-001'), {})
+        check('R1: 커밋 이후 NOTICE 변경 감지 → Review PARTIAL',
+              raw.get('Review', ('', ''))[0] == 'PARTIAL'
+              and 'NOTICE' in raw.get('Review', ('', ''))[1],
+              str(raw.get('Review')))
+        status = next((s for _, r, _, s, _ in a.reqs if r == 'REQ-001'), None)
+        check('R1: 거짓 DONE 경로 차단 — REQ-001 IN PROGRESS',
+              status == 'IN PROGRESS')
+
+    # 사례 8: 케이스 목록은 대상 칸만 읽고(R2), TASK 휴리스틱 오판을 막는다 (R3)
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, r2=True)
+        a = analyze(tmp)
+        raw = next((dims for _, r, dims, _, _ in a.reqs if r == 'REQ-001'), {})
+        check('R2: 절차 칸의 ERR 언급은 커버가 아니다 → Tests MISSING',
+              raw.get('Tests', ('', ''))[0] == 'MISSING'
+              and 'ERR-001' in raw.get('Tests', ('', ''))[1],
+              str(raw.get('Tests')))
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, r3=True)
+        a = analyze(tmp)
+        raw = next((dims for _, r, dims, _, _ in a.reqs if r == 'REQ-001'), {})
+        check('R3: "완료 후 재검토 필요"는 미완료다 → Implementation PARTIAL',
+              raw.get('Implementation', ('', ''))[0] == 'PARTIAL'
+              and 'TASK-001' in raw.get('Implementation', ('', ''))[1],
+              str(raw.get('Implementation')))
+        check('R3: 휴리스틱 고지 비고가 있다',
+              any('휴리스틱' in n for _, _, _, _, notes in a.reqs for n in notes))
+
+    # 사례 9: traceability.md 파일 부재(N2)와 spec.md 부재(N3)
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, no_trace=True)
+        a = analyze(tmp)
+        check('N2: spec 선언 REQ가 traceability.md 부재로 NOT READY',
+              len(a.reqs) == 2
+              and all(s == 'NOT READY' for _, _, _, s, _ in a.reqs),
+              str([(r, s) for _, r, _, s, _ in a.reqs]))
+        check('N2: 파일 부재는 구조 위반이 아니라 상태다',
+              not a.violations, str(a.violations))
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, no_spec=True)
+        a = analyze(tmp)
+        check('N3: spec.md 부재를 비고로 보고한다',
+              any('spec.md가 없어' in m for _, m in a.extras), str(a.extras))
+        status = next((s for _, r, _, s, _ in a.reqs if r == 'REQ-001'), None)
+        check('N3: 범위 검사 생략 외 계산은 정상 — REQ-001 DONE', status == 'DONE')
+
+    # 사례 10: 근거 칸의 커밋 해시 비고(R5)와 TRACEABILITY_COMPLETE 교차검증
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, no_hash=True)
+        a = analyze(tmp)
+        check('R5: 근거에 커밋 해시가 없으면 비고로 보고한다',
+              any('커밋 해시가 없다' in m for _, m in a.extras), str(a.extras))
+        raw = next((dims for _, r, dims, _, _ in a.reqs if r == 'REQ-001'), {})
+        check('R5: 해시 없는 근거는 변경 확인 불가 → Review PARTIAL',
+              raw.get('Review', ('', ''))[0] == 'PARTIAL', str(raw.get('Review')))
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, tc_complete=True)
+        a = analyze(tmp)
+        check('교차검증: TRACEABILITY_COMPLETE=true와 미완료 REQ의 모순을 비고로 보고',
+              any('TRACEABILITY_COMPLETE=true 기록' in m and 'REQ-002' in m
+                  for _, m in a.extras), str(a.extras))
+
     print('== self-test: %s ==' % ('전부 통과' if not failures
                                    else '%d건 실패' % len(failures)))
     return 2 if failures else 0
 
 
 def _fixture(root, stale_gate=False, broken=False, latest_false=False,
-             bad_rows=False):
+             bad_rows=False, no_trace=False, no_spec=False, no_records=False,
+             plan_bare=False, r2=False, r3=False, no_hash=False,
+             tc_complete=False):
     """§3–§5 사례용 최소 저장소를 만든다.
 
     broken=False: REQ-001은 전 차원 PASS(게이트 유효 줄, 커밋-핀 재판정 통과),
@@ -934,6 +1103,14 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
     bad_rows=True: 기록 표에 4칸 줄(5칸 위반)·값 칸 위반 줄·판정자 빈 칸 줄을
     더해 무효 줄 탐지와 무효 줄 제외를 시험한다.
     broken=True: dangling WF-999와 not_applicable 위반, spec 선언만 있는 REQ-003을 둔다.
+    no_trace=True: traceability.md 파일 자체를 두지 않는다 (N2: spec 선언 REQ는 NOT READY).
+    no_spec=True: spec.md를 두지 않는다 (N3: 범위 검사 생략을 비고로 보고).
+    no_records=True: gates.md에 `## 기록` 절을 두지 않는다 (N1: 크래시 없이 전부 UNKNOWN).
+    plan_bare=True: plan.md에 슬래시 없는 NOTICE를 두고 커밋 뒤 변경한다 (R1).
+    r2=True: TC-003의 대상 칸을 비우고 절차 칸에만 ERR-001을 둔다 (R2).
+    r3=True: TASK-001 상태를 "완료 후 재검토 필요"로 둔다 (R3).
+    no_hash=True: 유효 기록 줄의 근거에서 커밋 해시를 뺀다 (R5).
+    tc_complete=True: TRACEABILITY_COMPLETE=true 기록 줄을 더한다 (교차검증 비고).
     """
     cid = '001-demo'
     w = lambda rel, s: _write(root, rel, s)
@@ -990,6 +1167,8 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
 ''')
     w('docs/08_error_cases.md', 'ERR-001 비밀번호 불일치\n')
     tc3 = 'FAIL' if broken else 'PASS'
+    tc3_target = '—' if r2 else 'ERR-001'
+    tc3_proc = 'ERR-001을 유도한다' if r2 else '틀린 비밀번호'
     w('docs/09_test_cases.md', '''# 09 Test Cases
 
 ## 케이스 목록
@@ -998,7 +1177,7 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
 |---|---|---|---|---|---|---|
 | TC-001 | 정상 | AC-001 | 입력 후 저장 | 로그인 됨 | tests/test_login.py | PASS |
 | TC-002 | 예외 | AC-002 | 틀린 비밀번호 | 거부 | tests/test_login.py | PASS |
-| TC-003 | 예외 | ERR-001 | 틀린 비밀번호 | 오류 표시 | tests/test_login.py | %s |
+| TC-003 | 예외 | %s | %s | 오류 표시 | tests/test_login.py | %s |
 | TC-004 | 정상 | AC-003 | 오류 유도 | 안내 표시 | tests/test_login.py | NOT RUN |
 
 ## 실행 증거 (결과가 PASS 또는 FAIL인 TC마다 한 줄)
@@ -1008,12 +1187,19 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
 | TC-001 | PASS | 2026-10-09 10:00 | pytest tests/test_login.py | aaa0000 | evidence/tc1.log | tester |
 | TC-002 | PASS | 2026-10-09 10:00 | pytest tests/test_login.py | aaa0000 | evidence/tc2.log | tester |
 | TC-003 | %s | 2026-10-09 10:00 | pytest tests/test_login.py | aaa0000 | evidence/tc3.log | tester |
-''' % (tc3, tc3))
-    w('specs/%s/spec.md' % cid,
-      '변경 범위 REQ: REQ-001, REQ-002%s\n' % (', REQ-003' if broken else ''))
+''' % (tc3_target, tc3_proc, tc3, tc3))
+    if not no_spec:
+        w('specs/%s/spec.md' % cid,
+          '변경 범위 REQ: REQ-001, REQ-002%s\n' % (', REQ-003' if broken else ''))
+    task1 = '완료 후 재검토 필요' if r3 else 'DONE'
     w('specs/%s/tasks.md' % cid,
-      '| TASK-001 | 로그인 구현 | DONE |\n| TASK-002 | 안내 문구 | 진행 중 |\n')
-    w('specs/%s/plan.md' % cid, '변경할 파일: src/auth.py, tests/test_login.py\n')
+      '| TASK-001 | 로그인 구현 | %s |\n| TASK-002 | 안내 문구 | 진행 중 |\n'
+      % task1)
+    w('specs/%s/plan.md' % cid,
+      '변경할 파일: src/auth.py, tests/test_login.py%s\n'
+      % (', NOTICE' if plan_bare else ''))
+    if plan_bare:
+        w('NOTICE', 'notices\n')
     na_inline = ('    not_applicable: {screen_api: "화면 변경 없음", '
                  'data: "데이터 변경 없음", permission: "PERM-001 검사 변경 없음", '
                  'error_cases: "ERR-001 처리 변경 없음"}\n')
@@ -1027,7 +1213,7 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
                     '      permission: "PERM-001 검사 변경 없음"\n'
                     '      error_cases: "ERR-001 처리 변경 없음"\n')
         wf2 = 'WF-001'
-    w('specs/%s/traceability.md' % cid, '''# Traceability
+    tr_content = '''# Traceability
 
 ```yaml
 - id: REQ-001
@@ -1059,7 +1245,9 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
   code:           [src/auth.py]
 %s
 ```
-''' % (wf2, na_inline if not broken and not stale_gate else na_block))
+''' % (wf2, na_inline if not broken and not stale_gate else na_block)
+    if not no_trace:
+        w('specs/%s/traceability.md' % cid, tr_content)
     w('specs/%s/review.md' % cid, '독립 리뷰 결과 예시\n')
     w('src/auth.py', '# implementation\n')
     w('tests/test_login.py', '# tests\n')
@@ -1080,6 +1268,10 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
                      '| 2026-10-09 | IMPLEMENTATION_REVIEW_PASS | false | '
                      'REVIEWER reviewer-2 | 커밋 `%s` 재판정 결과 false |\n'
                      % commit[:7])
+    elif no_hash:
+        gate_rows = ('| 2026-10-09 | IMPLEMENTATION_REVIEW_PASS | true | '
+                     'REVIEWER reviewer-1 | 리뷰 결과 specs/%s/review.md '
+                     '(근거 해시 미기재) |\n' % cid)
     else:
         gate_rows = ('| 2026-10-09 | IMPLEMENTATION_REVIEW_PASS | true | '
                      'REVIEWER reviewer-1 | 커밋 `%s` 리뷰 결과 specs/%s/review.md |\n'
@@ -1089,6 +1281,9 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
                       '| 2026-10-09 | TRACEABILITY_COMPLETE | MAYBE | '
                       'REVIEWER r1 | 값 위반 줄 |\n'
                       '| 2026-10-09 | SPEC_READY | true | | 판정자 빈 칸 줄 |\n')
+    if tc_complete:
+        gate_rows += ('| 2026-10-09 | TRACEABILITY_COMPLETE | true | '
+                      'REVIEWER r1 | 커밋 `%s` 전 REQ DONE 판정 |\n' % commit[:7])
     w('specs/%s/gates.md' % cid, '''# gates (change)
 
 ## 이력 (구 형식 8칸 — 현재 값 계산에서 제외된다)
@@ -1102,10 +1297,22 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
 | 일시 | Gate | 값 | 판정자 | 근거 |
 |---|---|---|---|---|
 %s''' % gate_rows)
+    if no_records:
+        # N1: `## 기록` 절이 없는 새 change·새 프로젝트의 상태를 시험한다.
+        _write(root, os.path.join('specs', cid, 'gates.md'),
+               '# gates (change)\n\n'
+               '## 이력 (구 형식 8칸 — 현재 값 계산에서 제외된다)\n\n'
+               '| 일시 | Gate | 값 | 판정자 유형 | 판정자 | 판정 기준 | 근거 | 비고 |\n'
+               '|---|---|---|---|---|---|---|---|\n'
+               '| 2026-10-01 | IMPLEMENTATION_REVIEW_PASS | true | '
+               'INDEPENDENT_REVIEWER | 옛 리뷰어 | 구 기준 | `aaa0000` | 이력 |\n')
     _git_commit_all(root)
     if latest_false:
         # 커밋 이후 코드 변경(미커밋) — 값 false가 변경 확인보다 먼저임을 시험한다.
         _write(root, 'src/auth.py', '# implementation\n# changed after review\n')
+    if plan_bare:
+        # 커밋 이후 NOTICE 변경(미커밋) — R1: 슬래시 없는 plan 경로도 재판정 대상이다.
+        _write(root, 'NOTICE', 'notices\n# changed after review\n')
 
 
 def _write(root, rel, content):

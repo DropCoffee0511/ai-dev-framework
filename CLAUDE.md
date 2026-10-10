@@ -21,6 +21,6 @@ Claude Code 전용 세부 사항: `adapters/claude-code/README.md`
 
 ## 저장소 현황
 
-- 문서 전용 저장소다 (2026-10-02 기준 소스코드·manifest 없음). 실행할 build/lint/test 명령이 아직 없으므로 지어내지 말고, 도입하면 이 파일에 추가한다.
+- 문서 전용 저장소다 (2026-10-02 기준 소스코드·manifest 없음). 실행할 build/lint/test 명령이 아직 없다. 검사 스크립트 1개가 있다: `python3 scripts/check_traceability.py` (`docs/traceability-convention.md` §3–§5 계산, python3 표준 라이브러리만 사용, `--self-test`로 자기 시험). git이 실행 가능해야 한다 (`--self-test`가 임시 git 저장소를 만들고 §5.3 재판정 확인에 git을 쓴다).
 - `261002 대화내용.txt`는 설계 원천 기록이다. 수정하지 않는다. 파일명에 공백·한글이 있으므로 셸에서는 따옴표로 감싼다.
 - 디렉터리 이름 `ai-dev-framwork`는 철자가 틀린 상태 그대로 둔다 (이름 변경은 사용자 승인 필요).
