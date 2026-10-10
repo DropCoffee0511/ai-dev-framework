@@ -215,8 +215,10 @@ def _parse_test_cases(root, reg):
             continue
         reg.ids['TC'] |= find_ids(line, {'TC'})
         if re.search(r'케이스 목록', section):
-            if cells[0] == 'ID' or any('대상' in c for c in cells):
-                # 헤더 행 — 대상(AC/ERR/PERM) 칸의 위치를 찾는다 (R2: 그 칸만 읽는다)
+            if cells[0] == 'ID':
+                # 헤더 행 — 대상(AC/ERR/PERM) 칸의 위치를 찾는다 (R2: 그 칸만 읽는다).
+                # 첫 칸이 정확히 'ID'인 행만 헤더로 본다. 데이터 행의 절차 칸에
+                # '대상'이라는 말이 들어 있어도 헤더로 오판하지 않는다 (재검토 NEW-1).
                 reg.tc_target_col = next((i for i, c in enumerate(cells)
                                           if '대상' in c), 2)
             elif re.fullmatch(ID_RE, cells[0]):
@@ -1083,6 +1085,20 @@ def self_test():
               any('TRACEABILITY_COMPLETE=true 기록' in m and 'REQ-002' in m
                   for _, m in a.extras), str(a.extras))
 
+    # 사례 11: 데이터 행의 절차 칸에 '대상'이 있어도 헤더로 오판하지 않는다 (NEW-1)
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, r2b=True)
+        a = analyze(tmp)
+        status, dims = dims_of(a, 'REQ-001')
+        check('NEW-1: 절차 칸의 "대상"은 헤더가 아니다 — REQ-001 DONE 유지',
+              status == 'DONE' and dims.get('Tests') == 'PASS', str(dims))
+        check('NEW-1: TC-001이 결과 집계에서 빠지지 않는다',
+              'TC-001' in a.reg.tc_result and a.reg.tc_result['TC-001'] == 'PASS',
+              str(a.reg.tc_result))
+        check('NEW-1: 대상 칸 위치가 어긋나지 않는다',
+              a.reg.tc_target_col == 2 and 'AC-001' in a.reg.tc_targets['TC-001'],
+              str((a.reg.tc_target_col, a.reg.tc_targets.get('TC-001'))))
+
     print('== self-test: %s ==' % ('전부 통과' if not failures
                                    else '%d건 실패' % len(failures)))
     return 2 if failures else 0
@@ -1091,7 +1107,7 @@ def self_test():
 def _fixture(root, stale_gate=False, broken=False, latest_false=False,
              bad_rows=False, no_trace=False, no_spec=False, no_records=False,
              plan_bare=False, r2=False, r3=False, no_hash=False,
-             tc_complete=False):
+             tc_complete=False, r2b=False):
     """§3–§5 사례용 최소 저장소를 만든다.
 
     broken=False: REQ-001은 전 차원 PASS(게이트 유효 줄, 커밋-핀 재판정 통과),
@@ -1110,6 +1126,7 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
     r2=True: TC-003의 대상 칸을 비우고 절차 칸에만 ERR-001을 둔다 (R2).
     r3=True: TASK-001 상태를 "완료 후 재검토 필요"로 둔다 (R3).
     no_hash=True: 유효 기록 줄의 근거에서 커밋 해시를 뺀다 (R5).
+    r2b=True: TC-001의 절차 칸에 '대상'이라는 말을 둔다 (NEW-1: 데이터 행 헤더 오판 회귀).
     tc_complete=True: TRACEABILITY_COMPLETE=true 기록 줄을 더한다 (교차검증 비고).
     """
     cid = '001-demo'
@@ -1169,13 +1186,14 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
     tc3 = 'FAIL' if broken else 'PASS'
     tc3_target = '—' if r2 else 'ERR-001'
     tc3_proc = 'ERR-001을 유도한다' if r2 else '틀린 비밀번호'
+    tc1_proc = '대상 화면 진입 후 입력' if r2b else '입력 후 저장'
     w('docs/09_test_cases.md', '''# 09 Test Cases
 
 ## 케이스 목록
 
 | ID | 종류 | 대상 (AC / ERR / PERM) | 절차 | 기대 결과 | 테스트 코드 위치 | 결과 |
 |---|---|---|---|---|---|---|
-| TC-001 | 정상 | AC-001 | 입력 후 저장 | 로그인 됨 | tests/test_login.py | PASS |
+| TC-001 | 정상 | AC-001 | %s | 로그인 됨 | tests/test_login.py | PASS |
 | TC-002 | 예외 | AC-002 | 틀린 비밀번호 | 거부 | tests/test_login.py | PASS |
 | TC-003 | 예외 | %s | %s | 오류 표시 | tests/test_login.py | %s |
 | TC-004 | 정상 | AC-003 | 오류 유도 | 안내 표시 | tests/test_login.py | NOT RUN |
@@ -1187,7 +1205,7 @@ def _fixture(root, stale_gate=False, broken=False, latest_false=False,
 | TC-001 | PASS | 2026-10-09 10:00 | pytest tests/test_login.py | aaa0000 | evidence/tc1.log | tester |
 | TC-002 | PASS | 2026-10-09 10:00 | pytest tests/test_login.py | aaa0000 | evidence/tc2.log | tester |
 | TC-003 | %s | 2026-10-09 10:00 | pytest tests/test_login.py | aaa0000 | evidence/tc3.log | tester |
-''' % (tc3_target, tc3_proc, tc3, tc3))
+''' % (tc1_proc, tc3_target, tc3_proc, tc3, tc3))
     if not no_spec:
         w('specs/%s/spec.md' % cid,
           '변경 범위 REQ: REQ-001, REQ-002%s\n' % (', REQ-003' if broken else ''))
