@@ -48,7 +48,10 @@
 - 폴더는 옮기지 않았다. 템플릿과 자체 기록의 물리적 분리는 `NEXT.md`의 사용자 결정 사항이다. 검증자 3회(1차 FAIL MEDIUM 3건, 2차 FAIL MEDIUM 1건 반영 후 3차 PASS)
 
 ### Added (traceability check script, 2026-10-09)
-- `scripts/check_traceability.py`: `docs/traceability-convention.md` §3–§5 자동 계산 (`NEXT.md` 구현 후보 2). 단일 파일, python3 표준 라이브러리만 사용(외부 의존성 0). REQ별 차원 판정(§3)·상태 계산(§4), `gates.md` 기록 표 판독(맨 아래 유효 줄, 이력 구역 제외, 판정자 규칙 §5.2), Review 차원의 커밋-핀 재판정 확인(§5.3), 계산 못 하는 항목은 보수적으로 PARTIAL/MISSING 처리. `--self-test` 내장 시험 21건 통과. 자기 저장소 적용: `docs/gates.md`에서 `B_FINAL = false` 판독, 구조 위반 0건. 계산기이며 규칙의 단일 출처는 convention이다 — 규칙 문서 변경은 도입 안내 1문장뿐이다
+- `scripts/check_traceability.py`: `docs/traceability-convention.md` §3–§5 자동 계산 (`NEXT.md` 구현 후보 2). 단일 파일, python3 표준 라이브러리만 사용(외부 의존성 0). REQ별 차원 판정(§3)·상태 계산(§4), `gates.md` 기록 표 판독(맨 아래 유효 줄, 이력 구역 제외, 판정자 규칙 §5.2), Review 차원의 커밋-핀 재판정 확인(§5.3), 판정 한계는 비고와 v0 한계로 명시. `--self-test` 내장 시험 통과(초기 21건). 자기 저장소 적용: `docs/gates.md`에서 `B_FINAL = false` 판독, 구조 위반 0건. 계산기이며 규칙의 단일 출처는 convention이다 — 규칙 문서 변경은 도입 안내 1문장뿐이다
+
+### Fixed (wave 002 1차 독립 검토 반영, 2026-10-10)
+- 1차 독립 검토(`docs/audits/wave002-review-2026-10-10.md`, dynamic-workflow 런 `dwfrun-3d1d3dfe`)는 종합 **FAIL** — 규칙 무결성 APPROVE(규칙 약화 0건), 계산 격차 HIGH 2건·MEDIUM 4건·LOW 7건. `scripts/check_traceability.py` 수정: AC의 TC 목록이 비거나 필수 권한 테스트 TC 칸이 비면 Tests `MISSING`(HIGH), 실행 증거는 §4 필수 칸(실행 일시·명령·커밋·증거 경로)이 채워진 PASS 줄만 인정(HIGH), §5.2 3행 Gate의 판정자 빈 칸을 무효 줄로 처리·보고에 해당 Gate 표시(MEDIUM), Review 차원에서 값 `false`를 STALE·변경 확인보다 먼저 평가(MEDIUM), screen_api의 SCR-/API- 외 ID·code의 저장소 밖 경로를 위반 처리(LOW), spec 선언 밖 초과 REQ는 위반에서 비고로 완화(LOW), "보수적 PARTIAL/MISSING 처리" 주장을 실제 동작에 맞게 정정(LOW). `--self-test`에 5칸·값·판정자 빈 칸·맨 아래 유효 줄 채택 사례 추가(21건→27건). 규칙 문서 변경 없음(규칙 순증가 0줄). 재검토 진행 중
 
 ### Not changed
 - `MASTER_PROMPT.md`, `BOOTSTRAP.md`, `261002 대화내용.txt`

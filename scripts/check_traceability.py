@@ -5,8 +5,9 @@
 `docs/traceability-convention.md`(이하 convention)의 계산 규칙을 저장소에 적용해
 REQ별 차원 판정(§3), REQ 상태 계산(§4), Gate 기록의 현재 값(§5)을 계산한다.
 이 스크립트는 **계산기**다. 규칙의 단일 출처는 convention이며 이 파일은 규칙을
-추가하거나 완화하지 않는다. 계산하지 못하는 항목은 PASS 대신 보수적으로
-PARTIAL/MISSING과 비고로 남긴다 (거짓 DONE 방지 — MASTER_PROMPT §21).
+추가하거나 완화하지 않는다. convention §3의 판정 조건을 있는 그대로 계산하며
+조건에 없는 추가 감점을 만들지 않는다. 계산이 닿지 않는 영역은 비고와 아래
+v0 한계로 남긴다 (거짓 DONE 방지 — MASTER_PROMPT §21).
 
 사용:
     python3 scripts/check_traceability.py [ROOT]          # 저장소 검사
@@ -22,6 +23,8 @@ v0 한계 (convention §5.4·§6의 수동 절차를 대체하지 않는다):
 - not_applicable 사유의 타당성과 판정자 칸의 진위(위조)는 검사하지 않는다 (§5.4).
 - Tests의 "실행 시점 커밋 이후 코드 변경 시 재실행" 규칙(§4)은 검사하지 않는다.
   (Gate 재판정 §5.3 확인은 Review 차원 계산에서만 수행한다.)
+- 실행 증거는 §4가 요구하는 칸(실행 일시·명령·커밋·증거 경로)의 존재만 확인한다.
+  칸 내용의 진위(위조)는 검사하지 않는다.
 - yaml 파서는 convention §2의 제한된 형식(list·중첩 acceptance·not_applicable 사전)만
   이해한다. 문자열 값은 큰따옴표 또는 무따옴표, 주석은 행 단위(# 시작)만 지원한다.
 """
@@ -57,6 +60,10 @@ REVIEWER_USER_GATES = {'PLAN_REVIEW_PASS', 'IMPLEMENTATION_REVIEW_PASS',
                        'NO_UNRESOLVED_CRITICAL_REDTEAM_FINDINGS',
                        'TRACEABILITY_COMPLETE', 'NO_CRITICAL_OPEN_ISSUES',
                        'B_FINAL'}
+# convention §5.2 3행 — 판정자 칸에 컨텍스트 이름이 적혀야 한다 (빈 칸 무효)
+OTHER_GATES = {'DISCOVERY_COMPLETE', 'SPEC_READY', 'SPEC_AMBIGUITY_BLOCKERS',
+               'DESIGN_READY', 'PLAN_READY', 'IMPLEMENTATION_COMPLETE',
+               'REQUIRED_TESTS_PASS'}
 
 
 def find_ids(text, prefixes):
@@ -205,8 +212,11 @@ def _parse_test_cases(root, reg):
             reg.tc_result[cells[0]] = cells[-1].upper()
             reg.tc_targets[cells[0]] = find_ids(line, {'AC', 'ERR', 'PERM'})
             reg.tc_code[cells[0]] = cells[5] if len(cells) > 5 else ''
-        elif re.search(r'실행 증거', section) and len(cells) >= 2 \
-                and re.fullmatch(ID_RE, cells[0]) and cells[1].upper() == 'PASS':
+        elif re.search(r'실행 증거', section) and len(cells) >= 6 \
+                and re.fullmatch(ID_RE, cells[0]) and cells[1].upper() == 'PASS' \
+                and all(cells[2:6]):
+            # §4: 실행 일시·명령·커밋·증거 경로 칸이 채워진 PASS 줄만 증거다.
+            # 칸이 비면 증거 없는 PASS → effective_tc_result가 NOT RUN으로 처리한다.
             reg.tc_evidence.add(cells[0])
 
 
@@ -367,6 +377,8 @@ def parse_gates(text):
                 not ('REVIEWER' in cells[3] or 'USER' in cells[3]):
             problems.append('%s 기록자는 REVIEWER|USER여야 한다 (§5.2): "%s"'
                             % (cells[1], cells[3]))
+        if cells[1] in OTHER_GATES and not cells[3]:
+            problems.append('%s 기록자(판정자) 칸이 비어 있다 (§5.2)' % cells[1])
         if not cells[4]:
             problems.append('근거 칸이 비어 있다 (§5.1)')
         rows.append(GateRow(cells, problems))
@@ -430,6 +442,7 @@ class Analyzer:
         self.root = root
         self.reg = parse_registry(root)
         self.violations = []  # (파일, 메시지)
+        self.extras = []      # (파일, 메시지) — 위반은 아니지만 알아둘 항목
         self.reqs = []        # (파일, id, dims, status, notes)
         self.gates_seen = {}
 
@@ -454,7 +467,9 @@ class Analyzer:
                 self.reqs.append((rel, r, dims, 'NOT READY',
                                   ['traceability 항목 없음']))
             for r in sorted(set(by_id) - spec_reqs):
-                self.violation(rel, 'spec.md 선언 밖의 REQ 항목: %s' % r)
+                # 규약은 누락만 MISSING으로 규정하고 초과 항목을 금지하지 않는다 (§2).
+                self.extras.append((rel, 'spec.md 선언 밖의 REQ 항목: %s '
+                                        '(규약 위반 아님)' % r))
         gates = self._load_gates(
             os.path.join(os.path.dirname(rel), 'gates.md') if change
             else 'docs/gates.md', project=change is None)
@@ -529,6 +544,10 @@ class Analyzer:
         errs = self._valid_links(e, 'error_cases', path, change)
         scr_ids = {t for t in scr if t.startswith('SCR-')}
         api_ids = {t for t in scr if t.startswith('API-')}
+        for t in scr:
+            if t not in scr_ids and t not in api_ids:
+                self.violation(path, 'screen_api 항목은 SCR-/API- ID여야 한다 '
+                                     '(§2): %s' % t)
 
         # Requirement (§3)
         acc = e['acceptance']
@@ -566,6 +585,8 @@ class Analyzer:
             dims['Screen/API'] = ('PASS', 'not_applicable 사유 있음')
         elif not scr:
             dims['Screen/API'] = ('MISSING', '연결도 사유도 없음')
+        elif not scr_ids and not api_ids:
+            dims['Screen/API'] = ('MISSING', 'SCR-/API- ID가 없다 (§2)')
         elif bool(scr_ids) != bool(api_ids):
             dims['Screen/API'] = ('PARTIAL', '화면·API 중 한쪽만 연결됨')
         else:
@@ -607,14 +628,25 @@ class Analyzer:
         # Tests (§3)
         tests = self._valid_links(e, 'tests', path, change)
         required = set()
+        empty_acs = sorted(a for a, tcs in acc.items() if not tcs)
         for tcs in acc.values():
             required |= set(tcs)
+        perm_no_tc = sorted(p for p in perm
+                            if p in reg.perm_tcs and not reg.perm_tcs[p])
         for p in perm:
             if p in reg.perm_tcs:
                 required |= reg.perm_tcs[p]
             else:
                 notes.append('%s 필수 권한 테스트가 06 문서에 미정의 — 수동 확인' % p)
         tests_missing = False
+        if empty_acs:
+            dims['Tests'] = ('MISSING', 'TC가 없는 AC: %s (§2)'
+                             % ', '.join(empty_acs))
+            tests_missing = True
+        elif perm_no_tc:
+            dims['Tests'] = ('MISSING', '필수 권한 테스트 TC가 없는 PERM: %s (§2)'
+                             % ', '.join(perm_no_tc))
+            tests_missing = True
         for err in errs:
             tcs_e = {tc for tc, tg in reg.tc_targets.items() if err in tg}
             if not tcs_e:
@@ -637,20 +669,23 @@ class Analyzer:
                         (', '.join(bad),
                          ', '.join(reg.effective_tc_result(tc) for tc in bad)))
                 else:
-                    dims['Tests'] = ('PASS', '필요 TC 전부 실행 PASS (증거 확인)')
+                    dims['Tests'] = ('PASS', '필요 TC 전부 실행 PASS (증거 행 필드 확인)')
 
         # Implementation (§3)
         code_ok, code_bad = [], []
         for p in e['code']:
-            (code_ok if os.path.isfile(os.path.join(self.root, p))
-             else code_bad).append(p)
-        for p in code_bad:
-            self.violation(path, 'code 경로가 존재하지 않는다 (§2): %s' % p)
+            outside = os.path.isabs(p) or os.path.normpath(p).startswith('..')
+            exists = (not outside) and os.path.isfile(os.path.join(self.root, p))
+            if outside:
+                self.violation(path, 'code는 저장소 상대경로여야 한다 (§2): %s' % p)
+            elif not exists:
+                self.violation(path, 'code 경로가 존재하지 않는다 (§2): %s' % p)
+            (code_ok if exists else code_bad).append(p)
         tasks = self._valid_links(e, 'tasks', path, change)
         if not e['code']:
             dims['Implementation'] = ('MISSING', 'code가 비어 있다')
         elif code_bad:
-            dims['Implementation'] = ('MISSING', '존재하지 않는 code 경로')
+            dims['Implementation'] = ('MISSING', '존재하지 않거나 저장소 밖 code 경로')
         elif tasks:
             tmap = self._task_status(change)
             if tmap is None:
@@ -685,6 +720,10 @@ class Analyzer:
         if row is None:
             return ('PARTIAL', '유효한 IMPLEMENTATION_REVIEW_PASS 기록이 없다 '
                                '(UNKNOWN, §3·§5.1)')
+        # convention §3은 조건을 위에서부터 평가해 처음 맞는 것을 채택한다 —
+        # MISSING(값 false)이 STALE·변경 확인(PARTIAL)보다 먼저다.
+        if row.value == 'FALSE':
+            return ('MISSING', '유효한 기록 값이 false (§3)')
         if row.value == 'STALE':
             return ('PARTIAL', '최근 기록이 STALE — 재판정 필요 (§5.3)')
         targets = list(e['code'])
@@ -700,8 +739,6 @@ class Analyzer:
         if changed:
             return ('PARTIAL', '근거 커밋 이후 대상 파일 변경 — 재판정 필요 (§5.3): %s'
                     % ', '.join(changed[:5]))
-        if row.value == 'FALSE':
-            return ('MISSING', '유효한 기록 값이 false (§3)')
         return ('PASS', '유효한 기록 true, 커밋 %s 이후 대상 파일 변경 없음 (§5.3)'
                 % row.commit)
 
@@ -743,7 +780,7 @@ def report(a):
         if info['ignored']:
             out.append('  이력 구역 줄 %d개는 현재 값 계산에서 제외 (§5.1)'
                        % info['ignored'])
-        for gate in sorted(REVIEWER_USER_GATES | USER_ONLY_GATES):
+        for gate in sorted(REVIEWER_USER_GATES | USER_ONLY_GATES | OTHER_GATES):
             row = gate_current(info['rows'], gate)
             if row is None:
                 out.append('  %-44s UNKNOWN (유효한 기록 줄 없음)' % gate)
@@ -774,6 +811,8 @@ def report(a):
                   len(a.violations)))
     for path, msg in a.violations:
         out.append('  [위반] %s: %s' % (path, msg))
+    for path, msg in a.extras:
+        out.append('  [비고] %s: %s' % (path, msg))
     return '\n'.join(out)
 
 
@@ -856,18 +895,44 @@ def self_test():
         check('spec 선언된 REQ-003 항목 없음 → NOT READY',
               any(r == 'REQ-003' for _, r, _, s, _ in a.reqs if s == 'NOT READY'))
 
+    # 사례 4: 맨 아래 유효 줄 채택 + 값 false가 변경 확인보다 먼저 (§3·§5.1)
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, latest_false=True)
+        a = analyze(tmp)
+        status, dims = dims_of(a, 'REQ-001')
+        check('맨 아래 유효 줄(값 false) 채택 → Review MISSING',
+              dims.get('Review') == 'MISSING', str(dims))
+        check('Review MISSING → REQ-001 NOT READY (§4)', status == 'NOT READY')
+
+    # 사례 5: 기록 줄 5칸·값·판정자 빈 칸 위반 탐지, 무효 줄은 현재 값에서 제외
+    with tempfile.TemporaryDirectory() as tmp:
+        _fixture(tmp, bad_rows=True)
+        a = analyze(tmp)
+        msgs = ' | '.join(m for _, m in a.violations)
+        check('5칸 위반 기록 줄 탐지', '5칸' in msgs, msgs)
+        check('값 위반 기록 줄 탐지', 'true|false|STALE' in msgs, msgs)
+        check('OTHER Gate 판정자 빈 칸 탐지', '칸이 비어 있다' in msgs, msgs)
+        status, dims = dims_of(a, 'REQ-001')
+        check('무효 줄은 무시되고 유효 줄이 현재 값 — REQ-001 DONE 유지',
+              status == 'DONE' and dims.get('Review') == 'PASS', str(dims))
+
     print('== self-test: %s ==' % ('전부 통과' if not failures
                                    else '%d건 실패' % len(failures)))
     return 2 if failures else 0
 
 
-def _fixture(root, stale_gate=False, broken=False):
+def _fixture(root, stale_gate=False, broken=False, latest_false=False,
+             bad_rows=False):
     """§3–§5 사례용 최소 저장소를 만든다.
 
     broken=False: REQ-001은 전 차원 PASS(게이트 유효 줄, 커밋-핀 재판정 통과),
     REQ-002는 TC-004 NOT RUN과 미완료 TASK로 PARTIAL.
     stale_gate=True: 기록 줄에 AUTHOR 자기 승인(무효)·ACCEPTANCE REVIEWER(무효)·
     STALE 맨 아래 줄을 둬 §5.1·§5.2 판정을 시험한다.
+    latest_false=True: 유효 줄 2개(true→false)를 두고 커밋 이후 src/auth.py를
+    고쳐(미커밋) 맨 아래 유효 줄 채택과 값 false 우선을 시험한다.
+    bad_rows=True: 기록 표에 4칸 줄(5칸 위반)·값 칸 위반 줄·판정자 빈 칸 줄을
+    더해 무효 줄 탐지와 무효 줄 제외를 시험한다.
     broken=True: dangling WF-999와 not_applicable 위반, spec 선언만 있는 REQ-003을 둔다.
     """
     cid = '001-demo'
@@ -1009,10 +1074,21 @@ def _fixture(root, stale_gate=False, broken=False):
                      '| 2026-10-09 | IMPLEMENTATION_REVIEW_PASS | STALE | '
                      'REVIEWER reviewer-1 | 커밋 `%s` 이후 변경 발생 |\n'
                      % (commit[:7], commit[:7]))
+    elif latest_false:
+        gate_rows = ('| 2026-10-08 | IMPLEMENTATION_REVIEW_PASS | true | '
+                     'REVIEWER reviewer-1 | 커밋 `ccc0000` 1차 리뷰 |\n'
+                     '| 2026-10-09 | IMPLEMENTATION_REVIEW_PASS | false | '
+                     'REVIEWER reviewer-2 | 커밋 `%s` 재판정 결과 false |\n'
+                     % commit[:7])
     else:
         gate_rows = ('| 2026-10-09 | IMPLEMENTATION_REVIEW_PASS | true | '
                      'REVIEWER reviewer-1 | 커밋 `%s` 리뷰 결과 specs/%s/review.md |\n'
                      % (commit[:7], cid))
+    if bad_rows:
+        gate_rows += ('| 2026-10-09 | TRACEABILITY_COMPLETE | true | REVIEWER r1\n'
+                      '| 2026-10-09 | TRACEABILITY_COMPLETE | MAYBE | '
+                      'REVIEWER r1 | 값 위반 줄 |\n'
+                      '| 2026-10-09 | SPEC_READY | true | | 판정자 빈 칸 줄 |\n')
     w('specs/%s/gates.md' % cid, '''# gates (change)
 
 ## 이력 (구 형식 8칸 — 현재 값 계산에서 제외된다)
@@ -1027,6 +1103,9 @@ def _fixture(root, stale_gate=False, broken=False):
 |---|---|---|---|---|
 %s''' % gate_rows)
     _git_commit_all(root)
+    if latest_false:
+        # 커밋 이후 코드 변경(미커밋) — 값 false가 변경 확인보다 먼저임을 시험한다.
+        _write(root, 'src/auth.py', '# implementation\n# changed after review\n')
 
 
 def _write(root, rel, content):
