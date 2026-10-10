@@ -6,13 +6,12 @@
 
 ## 최근 요약 (wave 002)
 
-- 최종 갱신: 2026-10-10 11:20 KST (웨이브 7 세션)
+- 최종 갱신: 2026-10-10 11:35 KST (웨이브 7 세션)
 - 이번 과제: `NEXT.md` 구현 후보 2 — Traceability 검사 스크립트
-- 상태: **완료** — 1차 독립 검토 FAIL(계산 격차 HIGH 2건 포함 13지적)의 지적을 수정했고, 재검증(런 `dwfrun-edf17f7f`)에서 검증자 2명 모두 지적 9건 전부 RESOLVED·규칙 약화 0건·새 CRITICAL/HIGH 0건으로 **종합 APPROVE**를 받았다. 전문 `docs/audits/wave002-reverify-2026-10-10.md`
-- 커밋(브랜치 `feature/traceability-script`, 전부 미푸시 — push는 사용자 승인 대상): `3477dd6` feat → `dd07f7c`·`3090bce` 기록(웨이브 002 세션) → `fbfeaa4` fix(검토 반영) → `18904ac`·`f01d64b` 기록(웨이브 7)
+- 상태: **완료(재검증 APPROVE) + 잔여 지적 11건 후속 접수** — 1차 검토 FAIL 지적은 수정 후 재검증(런 `dwfrun-edf17f7f`)에서 9건 전부 RESOLVED·규칙 약화 0건으로 **APPROVE**(`docs/audits/wave002-reverify-2026-10-10.md`). 단, 이후 완료된 구 런들에서 1차 13지적에 없던 잔여 지적이 인계됐다 — **N1(HIGH) gates.md에 `## 기록` 절이 없으면 TypeError 크래시**, **R1(HIGH) plan.md의 슬래시 없는 경로가 §5.3 재판정 대상 누락(거짓 DONE 경로)** 포함 11건(아래 웨이브 기록). 수용 조건 AC 1–5는 전부 충족이지만 이 HIGH 2건이 새 커밋에서 해소·재검토되기 전에 스크립트를 "다른 프로젝트에 배포 가능" 수준으로 보지 않는다
+- 커밋(브랜치 `feature/traceability-script`, 전부 미푸시 — push는 사용자 승인 대상): `3477dd6` feat → `dd07f7c`·`3090bce` 기록(웨이브 002 세션) → `fbfeaa4` fix(검토 반영) → `18904ac`·`f01d64b`·`ed95dde` 기록(웨이브 7)
 - 규칙 순증가: wave 002 전체 2줄(convention 안내 1문장 + README 구조 목록 1줄). 검토 반영·재검증 구간은 규칙 문서 변경 0줄
-- 미처리 접수 2건: ① ADOPTING.md §1 복사 허용 목록에 `scripts/` 분류 추가(1줄 — 다음 웨이브 첫 과제 후보) ② audit-002 L-1 self-test 미시험(사용자 승인 대상)
-- 다음 실행의 첫 작업: `git fetch`로 origin 대조 후 ADOPTING.md `scripts/` 분류 1줄 추가(근거: 재검토 전 중복 런 `dwfrun-4505d5b5` 지적) 또는 §3.2-d·e에 따라 다음 과제 선택 — `NEXT.md` 구현 후보 3(Brownfield discovery 절차)이 다음 후보다
+- 다음 실행의 첫 작업(최우선): **잔여 지적 흡수** — N1·R1 HIGH 최소 수정 + self-test 사례(N1·R1·R2·R3 각 1건) + 나머지 M/LOW 최소 수정 → 자체 검증 → 커밋 → 신규 커밋 대상 재검토 1회(같은 초안 구조, edf17f7f 재사용 아님). 그다음 ADOPTING.md `scripts/` 분류 1줄 또는 구현 후보 3
 
 ## 스프린트 카드 (wave 002)
 
@@ -32,7 +31,7 @@
 
 ## 웨이브 기록
 
-### wave 002 — 구현 후보 2: Traceability 검사 스크립트 (2026-10-09~10, 완료)
+### wave 002 — 구현 후보 2: Traceability 검사 스크립트 (2026-10-09~10, 재검증 APPROVE·잔여 지적 후속 접수)
 
 - 최종 갱신: 2026-10-09 20:52 KST / 과제: `NEXT.md` 구현 후보 2 / 상태: 구현 완료·독립 검토 대기(커밋 `3477dd6`, 미푸시)
 - 변경한 문서: 위 요약 참조. 규칙 순증가 2줄(카드 목표 ≤3줄 이내)
@@ -60,13 +59,20 @@
 - 블로커: 없음. 다음 시도 조건: 재검토 판정 수신
 - 다음 실행의 첫 작업: 재검토 런 `dwfrun-edf17f7f-343f-4929-bb58-37b9c91d2b07`(수정 커밋 `fbfeaa4` 대상) 판정 수신 → APPROVE면 wave 002 완료 기록·AC-5 ✅·추가 접수 2건 처리 판단, FAIL이면 지적 반영 → 규칙 약화 여부도 다시 확인
 
-#### 2026-10-10 (웨이브 7 세션) — 재검증 APPROVE, wave 002 완료
+#### 2026-10-10 (웨이브 7 세션) — 재검증 APPROVE, 잔여 지적 인계 접수
 
-- 최종 갱신: 2026-10-10 11:20 KST / 상태: **완료**
+- 최종 갱신: 2026-10-10 11:35 KST / 상태: 재검증 APPROVE + 잔여 지적 후속 접수
 - 재검증: 런 `dwfrun-edf17f7f-343f-4929-bb58-37b9c91d2b07` — 수정 검증자·규칙 무결성 검증자 모두 **CLEAR**, 지적 9건 전부 **RESOLVED**(9/9 일치), 규칙 약화 0건, 새 CRITICAL/HIGH 0건, 결정론적 게이트 통과(`--self-test` exit 0·27건, 자기 적용 exit 0) — 종합 **APPROVE**. 전문 `docs/audits/wave002-reverify-2026-10-10.md`(항목별 file:line 표 전문은 런 아티팩트 보존 — 전문 회수는 검증자 재실행 약 100만 토큰을 요구해 생략하고 반환값·보고 항목에서 작성했다고 명시)
-- 미처리 접수 2건(위 기록 참조): ADOPTING.md `scripts/` 분류(다음 웨이브 첫 과제 후보) / audit-002 L-1 self-test(사용자 승인 대상)
-- 유지보수: 없음. 커밋: `f01d64b`(추가 접수 기록) + 재검증 보고·완료 기록 커밋 1건 — 전부 미푸시
-- 블로커: 없음. 다음 실행의 첫 작업: 최근 요약 헤더 참조(ADOPTING.md 1줄 또는 구현 후보 3)
+- **잔여 지적 인계(완료된 구 런들에서 1차 13지적에 없던 것 — 검증자들이 /tmp 픽스처 실행 재현까지 수행했고 메인 세션이 코드 판독으로 HIGH 2건을 재확인했다):**
+  - N1(HIGH, 런 `87a8f59c`): gates.md에 `## 기록` 절이 없거나 0바이트면 `parse_gates`가 rows=None을 반환하고 `_load_gates`가 이를 순회해 TypeError 크래시 — exit 1(구조 위반과 혼동)·보고 소실. 신규 채택 프로젝트의 첫 실행 경로
+  - R1(HIGH, 런 `b216d5a7`): plan_files 정규식 `[\w.-]+(?:/[\w.-]+)+`가 슬래시 없는 plan 경로(NOTICE 등)를 §5.3 재판정 대상에서 누락 — 거짓 DONE 경로 잔존
+  - N2(medium): spec.md가 REQ를 선언해도 traceability.md 파일 자체가 없으면 위반 0건·exit 0(§2 회피) / N3(medium): spec.md가 없으면 범위 검사를 비고 없이 생략
+  - R2(medium): tc_targets가 09 표 행 전체를 스캔(절차 칸의 ERR 언급도 커버 인정 — 대상 칸만 읽어야) / R3(medium): TASK 완료 휴리스틱이 "완료 후 재검토 필요"를 완료로 오판(`\[x\]|\bDONE\b|✅`로 축소 + 고지)
+  - R4(LOW): REQ 상세 블록 없으면 Requirement PASS → PARTIAL이 보수적(1차 LOW-6과 상반 — 다음 검토에서 방향 확정) / R5(LOW): gates 근거 칸의 커밋 해시 미요구(convention §5.1 대조 후 처리) / R6(LOW): README "소스코드·CLI는 아직 없다" 문구 / R7(LOW): PROGRESS.md의 미추적 AUTOPILOT.md 참조에 "로컬 전용" 명시 / R8(LOW): .gitignore에 .autopilot.lock·.autopilot-skip.log 누락(AUTOPILOT.md는 사용자 파일이라 제외)
+  - 런 `5ecaf5b2`의 신규 3건: CLAUDE.md 미갱신(스크립트 존재 반영), git 바이너리 요구 문서화, TRACEABILITY_COMPLETE ↔ 계산 DONE 교차검증 부재(계산기 범위에서 비고 경로로 검토)
+  - 처리 방침: N1·R1 HIGH 최소 수정 + self-test 사례(N1·R1·R2·R3) → M/LOW 최소 수정 → 자체 검증 → 커밋 → 신규 커밋 대상 재검토 1회. R4·R5처럼 검토자 간 상반·규약 확인이 필요한 것은 수정 전 convention 대조를 먼저 한다
+- 유지보수: 없음. 커밋: `f01d64b`(추가 접수)·`ed95dde`(재검증 보고·완료 기록) + 잔여 지적 접수 커밋 — 전부 미푸시
+- 블로커: 없음. 다음 실행의 첫 작업: 최근 요약 헤더 참조(잔여 지적 흡수가 최우선)
 
 ### wave 001 — audit-001 2차 지적 반영분 재검증 (2026-10-09, 완료)
 
