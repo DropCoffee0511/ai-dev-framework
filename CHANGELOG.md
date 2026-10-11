@@ -61,6 +61,7 @@
 ### Added (brownfield discovery procedure, 2026-10-11)
 - `workflows/discover/brownfield.md`: `MASTER_PROMPT.md` §3.2의 Brownfield 10개 절차의 실행 방법 (`NEXT.md` 구현 후보 3). 기준선 범위 판정("이번 변경이 닿는 범위" 기본 + 사용자 확인), 절차별 확인 대상·`docs/discovery.md` 기록 위치 표, 기능 인벤토리 표(근거 파일:위치 필수), `DISCOVERY_COMPLETE` 판정 전 채우는 완료 확인 표 — `docs/audits/audit-002.md`가 지적한 "인벤토리·기준선 범위 형식 부재", "어느 범위를 기준선으로 삼을지, 어떤 표로 완료를 확인할지"를 직접 답한다. 규칙 단일 출처(§3.2·§5.1, convention)는 변경하지 않았다
 - `workflows/discover/README.md`: `/project-discover` 동작 정의 초안(목적·입력·수행·금지·종료). 이름·동작의 확정과 어댑터 명령 등록은 사용자 결정 사항으로 남긴다 (`docs/discovery.md` 미결 #3)
+- 독립 검토 APPROVE(런 `dwfrun-f56c5c4b`, 2026-10-11): 검증자 2명(수용 조건 6항목/규칙 무결성 6항목) 전부 MET·CLEAR, 규칙 약화 0건, 새 CRITICAL/HIGH 0건. 보고 `docs/audits/wave003-review-2026-10-11.md`
 
 ### Not changed
 - `MASTER_PROMPT.md`, `BOOTSTRAP.md`, `261002 대화내용.txt`
