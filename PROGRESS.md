@@ -6,10 +6,12 @@
 
 ## 최근 요약 (wave 003)
 
-- 최종 갱신: 2026-10-11 09:XX KST (웨이브 9 세션 — 구현 후보 3 착수)
+- 최종 갱신: 2026-10-11 09:5X KST (웨이브 9 세션 — 구현 후보 3)
 - 이번 과제: `NEXT.md` 구현 후보 3 — Brownfield discovery 절차 구체화(`workflows/discover/`)와 `/project-discover` 동작 정의
-- 상태: 진행 중 (종료 시 갱신)
-- 다음 실행의 첫 작업: (종료 시 기입)
+- 상태: **구현 완료·독립 검토 대기** — 커밋 `7b04987`(브랜치 `feature/brownfield-discovery`, wave 002 종결 브랜치 `feature/traceability-script` 위에서 분기). 결정론적 검증 전부 통과(4종 게이트, `--self-test`, 자기 저장소 적용 exit 0). 독립 검토는 런 `dwfrun-f56c5c4b`(검증자 2명: 수용 조건 6항목 / 규칙 무결성 6항목, `GLM-5.3-Flash$high`, 커밋-핀 판독) 접수 — 판정 수신 시 아래 웨이브 기록에 덧붙인다
+- 다음 실행의 첫 작업: 런 `dwfrun-f56c5c4b` 판정 수신 → APPROVE면 wave 003 완료 기록, FAIL이면 지적 반영 후 재검토. REQUEST_CHANGES 항목은 규칙 약화 여부부터 확인
+- push 승인 대기: `feature/audit-001-reverify` 2커밋 + `feature/traceability-script` 15커밋 + `feature/brownfield-discovery` (이번 세션 커밋 포함) — push는 사용자 승인 대상
+- 사용자 참고: `사용자사용메뉴얼.md`는 커밋된 적 없는 미추적 파일이다(README가 참조하므로 커밋할지는 사용자 결정). wave 002의 5단계 사용자 샘플 테스트(메뉴얼 3단계)도 사용자 실행 차례다
 
 ## 스프린트 카드 (wave 003)
 
@@ -42,6 +44,20 @@
 - 확인 수단: `--self-test` + 자기 저장소 실행 출력 + 4종 문서 게이트(`AUTOPILOT.md` §3.1) + dynamic-workflow 독립 리뷰어
 
 ## 웨이브 기록
+
+### wave 003 — 구현 후보 3: Brownfield discovery 절차 + /project-discover 동작 정의 (2026-10-11, 검토 대기)
+
+- 최종 갱신: 2026-10-11 09:5X KST / 과제: `NEXT.md` 구현 후보 3 / 상태: 구현 완료·독립 검토 대기(커밋 `7b04987`, 미푸시)
+- 근거 확인: `docs/audits/audit-002.md` L25·L77의 적용성 시나리오 지적("인벤토리·기준선 범위 형식 없다", "어느 범위를 기준선으로 삼을지, 어떤 표로 완료를 확인할지 없다")이 이 과제의 빈곳을 직접 지목. `docs/discovery.md` 미결 #8이 절차 정의 장소를 `workflows/discover/`로 정해 둠. 후보 1(Gate 자동 강제)은 사용자 결정 항목("Gate 구현 방식")과 겹쳐 착수하지 않음(§3.2-a)
+- 변경한 문서: `workflows/discover/brownfield.md`(신규 — §0 기준선 범위 판정, §1 절차별 확인 대상·기록 위치 표, §2 기능 인벤토리 표, §3 완료 확인 표, §4 금지), `workflows/discover/README.md`(동작 정의 초안 절 추가), `adapters/claude-code/README.md`(예약 문구 갱신), `NEXT.md`(후보 3 완료 표기), `CHANGELOG.md`, 이 파일. `MASTER_PROMPT.md`·convention·`workflows/README.md`·`docs/01~10` 미변경
+- 규칙 순증가: 절차 문서 1개(58줄, 근거는 후보 3+미결 #8+audit-002). 단일 출처 본문 순증가 0줄 — 카드 목표대로. 문서 관행은 평서체·기존 표 형식 유지
+- 4종 게이트: ① 참조(세션당 1회 전체 스캔, 시작 시 오탐 0건) ② 링크(신규 파일 포함 재스캔, 깨진 링크 0건) ③ §-참조(변경 5문서 — §3.1·§3.2·§5.1·§5.11·§9·§10·§15.3·§21·§22 ↔ MASTER_PROMPT 실제 섹션, §1·§2·§5.1·§5.2 ↔ convention — 전부 일치) ④ CHANGELOG 갱신 — 전부 통과. `--self-test`와 자기 저장소 적용도 exit 0. 조건부 게이트: ① workflows/README.md 단계·Gate 매핑과 모순 없음(단계·Gate 정의 미변경) ② README 상태 문구 실제와 일치(CLI 미존재 유지) ③ gates.md 판정 추가 없음(해당 없음)
+- 독립 검토: 런 `dwfrun-f56c5c4b-99f8-41b6-926d-7ab1fec64b20`(1-페이즈: 결정론적 게이트 2건 + 검증자 2명 병렬 — 수용 조건 6항목 / 규칙 무결성 6항목, `GLM-5.3-Flash$high`, 커밋-핀 `7b04987` 판독, 초안 `.zcode/workflow-drafts/wave-003-독립-검토-커밋-7b04987.dwf.ts`). 판정 대기 — 대기 시간은 스프린트 예산에 세지 않는다(전례 실측: wave 001 약 9시간)
+- 도구로 확인한 근거: 위 게이트 실행 출력. 외부 조사(WebFetch 등) 미사용 — 이번 과제는 저장소 내 근거(감사·규약·백로그)로 충분했다
+- 유지보수: 없음 (과제 작업만 수행)
+- 커밋: `7b04987`(feat, 6개 파일 +107/−11) + 기록 커밋(아래) — 브랜치 `feature/brownfield-discovery`(신규 분기, `git config aidev-framework.auto-branch`에 기록), 전부 미푸시
+- 블로커: 없음. 다음 시도 조건: 판정 수신
+- 다음 실행의 첫 작업: 판정 수신 → 지적 반영(있으면) → wave 003 완료 기록. 이후 후보: `NEXT.md` 구현 후보 4(Phase 5 Self Test — 실행·판정 범위는 사용자 승인 필요로 표기됨) 또는 §9 백로그 점검
 
 ### wave 002 — 구현 후보 2: Traceability 검사 스크립트 (2026-10-09~10, 재검증 APPROVE·잔여 지적 후속 접수)
 
