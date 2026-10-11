@@ -4,16 +4,28 @@
 
 이 브랜치(`feature/traceability-script`, main `a33e74f` 기준)는 wave 002 전용이다. wave 001 기록은 `feature/audit-001-reverify` 브랜치(미푸시 2커밋)에서 이어 받아 아래 웨이브 기록에 보존했다.
 
-## 최근 요약 (wave 002)
+## 최근 요약 (wave 003)
 
-- 최종 갱신: 2026-10-11 02:1X KST (웨이브 8 세션 — 2차 재검토 판정 수신)
-- 이번 과제: wave 002 잔여 지적 흡수(편의 개선 1~4단계) + 사용자 샘플 테스트 준비(5단계)
-- 상태: **완료·종결** — 1차 재검토(`dwfrun-76f40125`)의 신규 HIGH 1건(NEW-1)을 `71f085d`에서 수정했고, 2차 재검토(런 `dwfrun-12ca5a04`)가 수정 검증 4/4·규칙 무결성 CLEAR(규칙 약화 0건·새 CRITICAL/HIGH 0건)로 확인했다. 판정식이 FAIL로 출력한 RECORDS 1건(감사 보고 ↔ 반환값 직접 대조 불가)은 메인 세션이 검증자 지정 대조를 수행해 전 항목 일치로 닫았다. 잔여 지적 15건 흡수 + NEW-1까지 완결. 보고는 `docs/audits/wave002-residual-review-2026-10-11.md`·`wave002-residual-reverify2-2026-10-11.md`
-- 커밋(브랜치 `feature/traceability-script`, 전부 미푸시 — push는 사용자 승인 대상): wave 002 본 작업 `3477dd6`→…→`2e536d0`(기록) + 흡수 `4ba3c2c`(fix)·`8b40410`·`2611d22`(기록) + NEW-1 `71f085d`(fix)·`a97965c`·`6490953`(기록) + 종결 기록 커밋(아래)
-- 규칙 순증가: 이번 세션 1줄(ADOPTING.md §1 복사함 목록의 `scripts/check_traceability.py`). 규칙 문서(convention·MASTER_PROMPT·workflows·docs/01~10) 변경 0줄 — 2차 무결성 검증자가 19경로 git diff 0줄로 직접 확인. wave 002 누적 3줄
-- 다음 실행의 첫 작업: 사용자 샘플 프로젝트 테스트 지원(메뉴얼 3단계 — 준비 완료) 또는 `NEXT.md` 구현 후보 3(Brownfield discovery). push 승인 대기 중(총 17커밋)
+- 최종 갱신: 2026-10-11 09:XX KST (웨이브 9 세션 — 구현 후보 3 착수)
+- 이번 과제: `NEXT.md` 구현 후보 3 — Brownfield discovery 절차 구체화(`workflows/discover/`)와 `/project-discover` 동작 정의
+- 상태: 진행 중 (종료 시 갱신)
+- 다음 실행의 첫 작업: (종료 시 기입)
 
-## 스프린트 카드 (wave 002)
+## 스프린트 카드 (wave 003)
+
+- 과제 ID: `NEXT.md` 구현 후보 3 — "Brownfield discovery 절차 구체화 (`workflows/discover/`) 와 `/project-discover` 동작 정의"
+- 문제: `MASTER_PROMPT.md` §3.2의 10개 절차가 한 줄 나열뿐이라 실행 방법이 없다. `docs/audits/audit-002.md`가 "Greenfield/Brownfield 적용성 FAIL — Brownfield 조사 요구는 있으나 인벤토리·기준선 범위 형식이 없다"(L25), "ERP 전체와 이번 변경 중 어느 범위를 기준선으로 삼을지, 어떤 표로 완료를 확인할지 없다"(L77)를 지적했다. `/project-discover`는 이름만 예약돼 동작이 정의돼 있지 않다
+- 이번 결과: 기존 프로젝트에서 discover를 실행할 수 있는 절차 문서(기준선 범위 판정 → §3.2 10개 절차별 확인 대상·기록 위치 → 인벤토리·완료 확인 표)와 `/project-discover` 동작 정의 초안이 생긴다
+- 범위: `workflows/discover/brownfield.md`(신규), `workflows/discover/README.md`, `adapters/claude-code/README.md`, `NEXT.md`, `CHANGELOG.md`, 이 파일. 규칙 단일 출처 본문(`MASTER_PROMPT.md` §3.2·§5.1, convention)은 변경하지 않는다
+- 규칙 순증가: 절차 문서 1개 — 근거는 구현 후보 3(`NEXT.md`) + `docs/discovery.md` 미결 #8("Brownfield 분석 방식 → `workflows/discover/`에 절차 정의") + audit-002 적용성 시나리오 지적. 단일 출처 본문 순증가 0줄(포인터만)
+- 불변식 영향(`AUTOPILOT.md` §2): 규칙 단일 출처 유지(§3.2·§5.1을 복제하지 않고 실행 방법만 기술, 충돌 시 본문 우선을 문서 머리에 명시), 최소 증가(근거 있는 1:1 추가), 템플릿·자기 기록 분리(`docs/01~10` 템플릿 미건드림), 버전·이력 일치(CHANGELOG·NEXT 갱신), 추적 가능성(audit-002 시나리오·후보 3·미결 #8과 연결)
+- 수용 조건:
+  1. 절차 문서가 §3.2의 10개 항목 각각에 확인 대상·기록 위치를 대응시키고, 기준선 범위 판정(§3.2의 "어느 범위까지 조사하는가")과 완료 확인 표(audit-002 L77의 "어떤 표로 완료를 확인할지")를 포함한다
+  2. `/project-discover` 동작 정의 초안이 목적·입력·수행·산출물·금지·Gate를 정의하고, 이름·동작의 확정이 사용자 결정임을 명시한다 (`docs/discovery.md` 미결 #3·R4 유지)
+  3. `workflows/README.md`의 단계 목록·Gate 매핑과 모순이 없다 (조건부 게이트 ①)
+  4. 4종 문서 게이트 + 스크립트 자기 저장소 적용 통과
+  5. dynamic-workflow 독립 리뷰 접수 (지연 시 검토 대기 등재와 경로·상태 기록까지)
+- 확인 수단: 4종 게이트(`AUTOPILOT.md` §3.1) + `scripts/check_traceability.py` 자기 적용 + dynamic-workflow 독립 리뷰어
 
 - 과제 ID: `NEXT.md` 구현 후보 2 — "`docs/traceability-convention.md` §3–§5를 자동 계산. 입력은 Markdown/YAML"
 - 문제: convention §3 차원 판정·§4 상태 계산·§5 Gate 기록 판독이 전부 수동이라 계산 누락·실수·우회가 가능하다 (`docs/discovery.md` R3의 하위 문제)
@@ -104,6 +116,16 @@
 - RECORDS 종결: 검증자가 제시한 방법("런 아카이브에 접근 가능한 세션에서 대조")대로 메인 세션이 1차 런 `dwfrun-76f40125` 반환값과 감사 보고를 항목별 대조 — 종합 FAIL·미해소 0건·약화 없음·15/15 RESOLVED·self-test 44건·NEW-1 재현 상세 **전부 일치**. 1차 보고에 부록으로 기록
 - 종결 근거: ① 검증자 2명 CLEAR ② 규칙 약화 0건·새 CRITICAL/HIGH 0건 ③ 유일 PARTIAL(RECORDS)을 검증자 지정 방법으로 닫음. 사용자가 이 판단에 이의를 제기하면 재검토를 다시 접수할 수 있다
 - 유지보수: 없음. 커밋: 종결 기록 1건 — 미푸시. 이후의 첫 작업: 사용자 샘플 테스트 지원 또는 구현 후보 3
+
+#### wave 002 스프린트 카드 (참고용 보존)
+
+- 과제 ID: `NEXT.md` 구현 후보 2 — "`docs/traceability-convention.md` §3–§5를 자동 계산. 입력은 Markdown/YAML"
+- 문제: convention §3 차원 판정·§4 상태 계산·§5 Gate 기록 판독이 전부 수동이라 계산 누락·실수·우회가 가능하다 (`docs/discovery.md` R3의 하위 문제)
+- 이번 결과: 단일 파일 스크립트(python3 표준 라이브러리만)가 traceability.md의 REQ별 차원·상태와 gates.md 기록의 현재 값을 계산하고, 내장 시험(--self-test)과 자기 저장소 적용으로 검증된다
+- 범위: `scripts/check_traceability.py`(신규), `docs/traceability-convention.md`(도입 안내 1줄 포인터), `CHANGELOG.md`, `NEXT.md`, `README.md`·`AGENTS.md` 상태 문구 최소 갱신, 이 파일. 규칙 본문(convention §1–§7 내용)은 변경하지 않는다
+- 규칙 순증가 목표: ≤3줄 → **실제 2줄** (convention 안내 문장, README 구조 목록. 규칙 추가 없음 — 스크립트는 규약의 계산기일 뿐이다)
+- 수용 조건 5건: ① 단일 파일·외부 의존성 0 ② `--self-test`가 §3·§4·§5 사례 전부 통과 ③ 자기 저장소 적용 위반 0건 ④ 4종 게이트 통과·기록 갱신·커밋 ⑤ dynamic-workflow 독립 리뷰 — 전부 ✅ (최종: self-test 47건, 재검증 APPROVE 런 `dwfrun-edf17f7f`, 잔여 지적 흡수 후 2차 재검토 CLEAR 런 `dwfrun-12ca5a04`. 상세는 위 웨이브 기록)
+- 확인 수단: `--self-test` + 자기 저장소 실행 출력 + 4종 문서 게이트 + dynamic-workflow 독립 리뷰어
 
 ### wave 001 — audit-001 2차 지적 반영분 재검증 (2026-10-09, 완료)
 

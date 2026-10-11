@@ -19,4 +19,4 @@ v0.1에서는 에이전트가 규약을 따르는 방식이다. Claude Code의 �
 
 ## 명령 이름 예약
 
-`/project-discover`, `/feature`는 이름만 예약한다 (동작 미정의). `/init`은 Claude Code 내장 명령과 충돌하므로 확정하지 않는다 (`docs/discovery.md` R4).
+`/project-discover`는 동작 정의 초안이 `workflows/discover/README.md`에 있다 (이름·동작의 확정은 사용자 결정, `NEXT.md`). `/feature`는 이름만 예약한다 (동작 미정의). `/init`은 Claude Code 내장 명령과 충돌하므로 확정하지 않는다 (`docs/discovery.md` R4).

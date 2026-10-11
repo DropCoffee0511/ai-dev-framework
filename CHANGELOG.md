@@ -58,5 +58,9 @@
 - 문서 보완: CLAUDE.md를 AGENTS.md의 스크립트 문구와 동기화(런 `5ecaf5b2` 지적), git 실행 요구를 README·AGENTS.md·CLAUDE.md·`사용자사용메뉴얼.md`에 문서화, README 상태 문구의 "소스코드는 없다"와 "스크립트가 있다" 모순 제거(R6)와 사용자 메뉴얼 안내 추가, `.gitignore`에 `.autopilot.lock`·`.autopilot-skip.log` 추가(R8), PROGRESS.md의 AUTOPILOT.md 참조에 로컬 전용 명시(R7)
 - ADOPTING.md §1 복사함 목록에 `scripts/check_traceability.py` 1줄 추가 (근거: convention 도입 안내가 이 스크립트를 §3–§5 계산기로 가리키므로 채택 프로젝트의 상태 계산에 필요하다. 적용 절차 문서의 1줄이며 규칙 문서 변경은 없다)
 
+### Added (brownfield discovery procedure, 2026-10-11)
+- `workflows/discover/brownfield.md`: `MASTER_PROMPT.md` §3.2의 Brownfield 10개 절차의 실행 방법 (`NEXT.md` 구현 후보 3). 기준선 범위 판정("이번 변경이 닿는 범위" 기본 + 사용자 확인), 절차별 확인 대상·`docs/discovery.md` 기록 위치 표, 기능 인벤토리 표(근거 파일:위치 필수), `DISCOVERY_COMPLETE` 판정 전 채우는 완료 확인 표 — `docs/audits/audit-002.md`가 지적한 "인벤토리·기준선 범위 형식 부재", "어느 범위를 기준선으로 삼을지, 어떤 표로 완료를 확인할지"를 직접 답한다. 규칙 단일 출처(§3.2·§5.1, convention)는 변경하지 않았다
+- `workflows/discover/README.md`: `/project-discover` 동작 정의 초안(목적·입력·수행·금지·종료). 이름·동작의 확정과 어댑터 명령 등록은 사용자 결정 사항으로 남긴다 (`docs/discovery.md` 미결 #3)
+
 ### Not changed
 - `MASTER_PROMPT.md`, `BOOTSTRAP.md`, `261002 대화내용.txt`
